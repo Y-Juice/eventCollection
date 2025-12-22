@@ -1,1 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Color Palette */
+  --coral-red: #FF6B5B;
+  --sunny-yellow: #FFD93D;
+  --mint-teal: #6BCAB3;
+  --soft-purple: #9B7EDE;
+  --blush-pink: #FFB5C5;
+  --lime-green: #A8E06F;
+  --sky-blue: #7EC8E3;
+  --warm-orange: #FFA552;
+  --cream-white: #F5F0E8;
+  --deep-navy: #1A1A2E;
+  
+  /* Gradients */
+  --hero-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--cream-white);
+  color: var(--deep-navy);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
