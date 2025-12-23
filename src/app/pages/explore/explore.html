@@ -1,0 +1,216 @@
+<div class="explore-container">
+  <!-- Header -->
+  <header class="explore-header">
+    <h1 class="explore-title">Explore</h1>
+    <p class="explore-subtitle">Find events across Belgium</p>
+  </header>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-bar">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search events, cities, venues..."
+        [value]="searchQuery()"
+        (input)="updateSearch($event)"
+      />
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="updateSearch('')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      }
+    </div>
+    <button class="filter-toggle" [class.active]="showFilters()" (click)="toggleFilters()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Filters Panel -->
+  @if (showFilters()) {
+    <div class="filters-panel">
+      <!-- City Filter -->
+      <div class="filter-group">
+        <label class="filter-label">City</label>
+        <div class="filter-chips">
+          @for (city of cities(); track city.id) {
+            <button 
+              class="filter-chip"
+              [class.active]="selectedCity() === city.id"
+              (click)="selectCity(city.id)"
+            >
+              <svg class="chip-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" [ngSwitch]="city.id">
+                <path *ngSwitchCase="'all'" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                <path *ngSwitchDefault d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <span>{{ city.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <div class="filter-chips">
+          @for (category of categories(); track category.id) {
+            <button 
+              class="filter-chip"
+              [class.active]="selectedCategory() === category.id"
+              [style.--active-color]="category.color"
+              (click)="selectCategory(category.id)"
+            >
+              <svg class="chip-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" [ngSwitch]="category.id">
+                <path *ngSwitchCase="'all'" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                <path *ngSwitchCase="'music'" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                <path *ngSwitchCase="'food'" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+                <path *ngSwitchCase="'culture'" d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+                <path *ngSwitchCase="'sports'" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                <path *ngSwitchCase="'art'" d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+              <span>{{ category.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Minimum Rating -->
+      <div class="filter-group">
+        <label class="filter-label">Minimum Rating</label>
+        <div class="rating-filter">
+          @for (star of [0, 1, 2, 3, 4, 5]; track star) {
+            <button 
+              class="rating-btn"
+              [class.active]="minRating() === star"
+              (click)="setMinRating(star)"
+            >
+              @if (star === 0) {
+                All
+              } @else {
+                {{ star }}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                +
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Clear Filters -->
+      <button class="clear-filters-btn" (click)="clearFilters()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+        Clear All Filters
+      </button>
+    </div>
+  }
+
+  <!-- Sort Options -->
+  <div class="sort-section">
+    <span class="results-count">{{ totalResults() }} of {{ totalEvents() }} events</span>
+    <div class="sort-options">
+      @for (option of sortOptions(); track option.id) {
+        <button 
+          class="sort-btn"
+          [class.active]="sortBy() === option.id"
+          (click)="setSortBy(option.id)"
+        >
+          <svg class="sort-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" [ngSwitch]="option.id">
+            <path *ngSwitchCase="'rating'" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            <path *ngSwitchCase="'visitors'" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            <path *ngSwitchCase="'reviews'" d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            <path *ngSwitchCase="'date'" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+          </svg>
+          <span class="sort-name">{{ option.name }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Results -->
+  <section class="results-section">
+    @if (filteredEvents().length === 0) {
+      <div class="no-results">
+        <svg class="no-results-icon" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <h3>No events found</h3>
+        <p>Try adjusting your search or filters</p>
+        <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+      </div>
+    } @else {
+      <div class="events-list">
+        @for (event of filteredEvents(); track event.id) {
+          <article class="event-item">
+            <div class="event-color-bar" [style.background]="event.color"></div>
+            <div class="event-main">
+              <div class="event-header">
+                <div class="event-category-icon" [style.background]="getCategoryColor(event.category)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white" [ngSwitch]="event.category">
+                    <path *ngSwitchCase="'music'" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    <path *ngSwitchCase="'food'" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+                    <path *ngSwitchCase="'culture'" d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+                    <path *ngSwitchCase="'sports'" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    <path *ngSwitchCase="'art'" d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                  </svg>
+                </div>
+                <div class="event-info">
+                  <h3 class="event-title">{{ event.title }}</h3>
+                  <p class="event-subtitle">{{ event.subtitle }}</p>
+                </div>
+                <div class="event-rating">
+                  <span class="rating-value">{{ event.rating }}</span>
+                  <svg class="rating-star" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <div class="event-details">
+                <div class="event-detail">
+                  <svg class="detail-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  <span>{{ event.city }} · {{ event.neighborhood }}</span>
+                </div>
+                <div class="event-detail">
+                  <svg class="detail-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                  </svg>
+                  <span>{{ formatDate(event.date) }} at {{ formatTime(event.time) }}</span>
+                </div>
+              </div>
+
+              <div class="event-stats">
+                <div class="stat">
+                  <svg class="stat-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                  </svg>
+                  <span class="stat-value">{{ formatVisitors(event.visitorCount) }}</span>
+                  <span class="stat-label">visitors</span>
+                </div>
+                <div class="stat">
+                  <svg class="stat-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                  </svg>
+                  <span class="stat-value">{{ event.reviewCount }}</span>
+                  <span class="stat-label">reviews</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

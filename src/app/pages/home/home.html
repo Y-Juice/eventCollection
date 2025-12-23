@@ -1,0 +1,243 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">
+      Discover Events
+      <span class="hero-title-accent">in {{ selectedCity() }}</span>
+    </h1>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ cityStats().eventCount }}</span>
+        <span class="stat-label">Events</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">{{ formatVisitors(cityStats().totalVisitors) }}</span>
+        <span class="stat-label">Visitors</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">
+          {{ cityStats().avgRating }}
+          <svg class="icon-star-inline" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        <span class="stat-label">Avg Rating</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Event Card -->
+  @if (featuredEvent(); as featured) {
+    <div class="featured-card" [style.background]="'linear-gradient(135deg, ' + featured.color + ' 0%, ' + featured.color + 'dd 100%)'">
+      <div class="featured-content">
+        <div class="featured-header">
+          <span class="featured-badge">
+            <svg class="icon-badge" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            Top Rated
+          </span>
+          <span class="featured-category-icon" [ngSwitch]="featured.category">
+            <svg *ngSwitchCase="'music'" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+            <svg *ngSwitchCase="'food'" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+            </svg>
+            <svg *ngSwitchCase="'culture'" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <svg *ngSwitchCase="'sports'" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <svg *ngSwitchCase="'art'" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <svg *ngSwitchDefault width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </span>
+        </div>
+        <h3 class="featured-title">{{ featured.title }}</h3>
+        <p class="featured-subtitle">{{ featured.subtitle }}</p>
+        <div class="featured-meta">
+          <span class="featured-date">
+            <svg class="icon-meta" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+            </svg>
+            {{ formatDate(featured.date) }}
+          </span>
+          <span class="featured-rating">
+            {{ featured.rating }}
+            <svg class="icon-meta" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            ({{ featured.reviewCount }})
+          </span>
+        </div>
+        <div class="featured-visitors">
+          <svg class="icon-meta" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+          <span>{{ formatVisitors(featured.visitorCount) }} visitors</span>
+        </div>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- City Selector -->
+<section class="city-section">
+  <h2 class="section-title">Select City</h2>
+  <div class="city-scroll">
+    @for (city of cities(); track city.name) {
+      <button 
+        class="city-card" 
+        [class.active]="selectedCity() === city.name"
+        (click)="selectCity(city.name)"
+      >
+        <span class="city-icon" [ngSwitch]="city.name">
+          <svg *ngSwitchCase="'Brussels'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <svg *ngSwitchCase="'Antwerp'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
+          </svg>
+          <svg *ngSwitchCase="'Ghent'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/>
+          </svg>
+          <svg *ngSwitchCase="'Bruges'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 21H3c-.55 0-1-.45-1-1v-8c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1zM14 21h-3c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v17c0 .55-.45 1-1 1zM22 21h-3c-.55 0-1-.45-1-1v-5c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v5c0 .55-.45 1-1 1z"/>
+          </svg>
+          <svg *ngSwitchCase="'Leuven'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
+          </svg>
+          <svg *ngSwitchCase="'Liège'" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+          </svg>
+        </span>
+        <span class="city-name">{{ city.name }}</span>
+        <span class="city-count">{{ city.eventCount }} events</span>
+      </button>
+    }
+  </div>
+</section>
+
+<!-- Category Filter -->
+<section class="category-section">
+  <div class="category-scroll">
+    @for (category of categories(); track category.id) {
+      <button 
+        class="category-chip"
+        [class.active]="selectedCategory() === category.id"
+        [style.--chip-color]="category.color"
+        (click)="selectCategory(category.id)"
+      >
+        <span class="category-icon" [ngSwitch]="category.id">
+          <svg *ngSwitchCase="'all'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+          <svg *ngSwitchCase="'music'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          </svg>
+          <svg *ngSwitchCase="'food'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+          </svg>
+          <svg *ngSwitchCase="'culture'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+          </svg>
+          <svg *ngSwitchCase="'sports'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+          <svg *ngSwitchCase="'art'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
+        </span>
+        <span class="category-name">{{ category.name }}</span>
+      </button>
+    }
+  </div>
+</section>
+
+<!-- Events Grid Section -->
+<section class="events-section">
+  <div class="section-header">
+    <h2 class="section-title">
+      @if (selectedCategory() === 'all') {
+        All Events
+      } @else {
+        {{ selectedCategory() | titlecase }} Events
+      }
+      <span class="event-count">({{ filteredEvents().length }})</span>
+    </h2>
+  </div>
+
+  @if (filteredEvents().length === 0) {
+    <div class="no-events">
+      <svg class="no-events-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <p>No events found for this category in {{ selectedCity() }}</p>
+    </div>
+  } @else {
+    <div class="events-grid">
+      @for (event of filteredEvents(); track event.id) {
+        <article class="event-card" [style.--card-color]="event.color">
+          <div class="event-card-header">
+            <span class="event-category-badge" [ngSwitch]="event.category">
+              <svg *ngSwitchCase="'music'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+              <svg *ngSwitchCase="'food'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+              </svg>
+              <svg *ngSwitchCase="'culture'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+              </svg>
+              <svg *ngSwitchCase="'sports'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              <svg *ngSwitchCase="'art'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+            </span>
+            <span class="event-date-badge">{{ formatDate(event.date) }}</span>
+          </div>
+          <div class="event-card-content">
+            <h3 class="event-title">{{ event.title }}</h3>
+            <p class="event-subtitle">{{ event.subtitle }}</p>
+            <p class="event-location">
+              <svg class="icon-location" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              {{ event.neighborhood }}
+            </p>
+          </div>
+          <div class="event-card-stats">
+            <div class="event-stat">
+              <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+              <span class="stat-value">{{ formatVisitors(event.visitorCount) }}</span>
+            </div>
+            <div class="event-stat">
+              <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+              </svg>
+              <span class="stat-value">{{ event.reviewCount }}</span>
+            </div>
+            <div class="event-stat rating">
+              <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+              <span class="stat-value">{{ event.rating }}</span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
