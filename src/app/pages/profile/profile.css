@@ -1,0 +1,633 @@
+.profile-container {
+  min-height: 100%;
+  padding-bottom: 20px;
+}
+
+/* Header */
+.profile-header {
+  background: linear-gradient(135deg, #7B68C8 0%, #9B7EDE 100%);
+  padding: 32px 20px;
+  text-align: center;
+  color: white;
+}
+
+.avatar-section {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: white;
+  color: #7B68C8;
+  font-size: 32px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.edit-avatar-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.edit-avatar-btn svg {
+  fill: #7B68C8;
+}
+
+.edit-avatar-btn:hover {
+  transform: scale(1.1);
+}
+
+.user-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.user-email {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 14px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-item svg {
+  fill: white;
+}
+
+.meta-divider {
+  opacity: 0.5;
+}
+
+.user-bio {
+  font-size: 14px;
+  opacity: 0.9;
+  max-width: 300px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 20px;
+  margin-top: -20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card .stat-icon {
+  fill: #7B68C8;
+}
+
+.stat-card .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A1A2E;
+}
+
+.stat-card .stat-label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Sections */
+.section {
+  padding: 0 20px 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 16px;
+}
+
+.section-title svg {
+  fill: #7B68C8;
+}
+
+/* Favorite Categories */
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: white;
+  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.category-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1A2E;
+}
+
+.category-count {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Achievements */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.achievement-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.achievement-card:hover {
+  transform: translateY(-2px);
+}
+
+.achievement-card.locked {
+  opacity: 0.6;
+}
+
+.achievement-card.locked .achievement-icon svg {
+  fill: #ccc;
+}
+
+.achievement-icon {
+  width: 44px;
+  height: 44px;
+  background: #FFF3E0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.achievement-icon svg {
+  fill: #FFB800;
+}
+
+.achievement-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1A2E;
+  margin-bottom: 4px;
+}
+
+.achievement-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.achievement-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7B68C8 0%, #9B7EDE 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+}
+
+.achievement-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.achievement-badge svg {
+  fill: white;
+}
+
+/* Recent Activity */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item {
+  display: flex;
+  gap: 14px;
+  background: white;
+  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  background: #E8E0F0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-icon svg {
+  fill: #7B68C8;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  font-size: 14px;
+  color: #1A1A2E;
+  margin-bottom: 4px;
+}
+
+.activity-text strong {
+  font-weight: 600;
+}
+
+.activity-meta {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Settings */
+.settings-list {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item:hover {
+  background: #F9F9F9;
+}
+
+.setting-label {
+  font-size: 15px;
+  color: #1A1A2E;
+}
+
+.toggle {
+  width: 48px;
+  height: 28px;
+  background: #ddd;
+  border-radius: 14px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.toggle.active {
+  background: #7B68C8;
+}
+
+.toggle-knob {
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.toggle.active .toggle-knob {
+  transform: translateX(20px);
+}
+
+/* Logout */
+.logout-section {
+  padding: 0 20px 40px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border: 2px solid #F44336;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #F44336;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn svg {
+  fill: #F44336;
+}
+
+.logout-btn:hover {
+  background: #F44336;
+  color: white;
+}
+
+.logout-btn:hover svg {
+  fill: white;
+}
+
+/* ========================================
+   TABLET STYLES (768px and up)
+   ======================================== */
+@media (min-width: 768px) {
+  .profile-header {
+    padding: 40px;
+  }
+
+  .avatar {
+    width: 110px;
+    height: 110px;
+    font-size: 40px;
+  }
+
+  .user-name {
+    font-size: 32px;
+  }
+
+  .user-bio {
+    max-width: 400px;
+  }
+
+  .stats-grid {
+    padding: 24px 40px;
+    gap: 16px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 26px;
+  }
+
+  .section {
+    padding: 0 40px 28px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .logout-section {
+    padding: 0 40px 40px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+/* ========================================
+   DESKTOP STYLES (1024px and up)
+   ======================================== */
+@media (min-width: 1024px) {
+  .profile-header {
+    padding: 48px 80px;
+  }
+
+  .stats-grid {
+    padding: 28px 80px;
+    max-width: 800px;
+    margin: -20px auto 0;
+  }
+
+  .section {
+    padding: 0 80px 32px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .categories-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .activity-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .logout-section {
+    padding: 0 80px 40px;
+  }
+}
+
+/* ========================================
+   LARGE DESKTOP STYLES (1440px and up)
+   ======================================== */
+@media (min-width: 1440px) {
+  .profile-header {
+    padding: 56px 120px;
+  }
+
+  .stats-grid {
+    padding: 32px 120px;
+  }
+
+  .section {
+    padding: 0 120px 36px;
+    max-width: 1200px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .logout-section {
+    padding: 0 120px 48px;
+  }
+}
+
+/* ========================================
+   SMALL MOBILE STYLES (under 375px)
+   ======================================== */
+@media (max-width: 374px) {
+  .profile-header {
+    padding: 24px 16px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+  }
+
+  .user-name {
+    font-size: 22px;
+  }
+
+  .user-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-divider {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px 10px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 20px;
+  }
+
+  .section {
+    padding: 0 16px 20px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .achievement-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .achievement-icon {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .logout-section {
+    padding: 0 16px 32px;
+  }
+}
+

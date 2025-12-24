@@ -1,0 +1,300 @@
+<div class="ratings-container">
+  <!-- Header -->
+  <header class="ratings-header">
+    <h1 class="ratings-title">My Ratings</h1>
+    <p class="ratings-subtitle">Rate events and share your experience</p>
+  </header>
+
+  <!-- User Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <svg class="stat-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <span class="stat-value">{{ userStats().totalRatings }}</span>
+      <span class="stat-label">Ratings</span>
+    </div>
+    <div class="stat-card">
+      <svg class="stat-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+      </svg>
+      <span class="stat-value">{{ userStats().totalReviews }}</span>
+      <span class="stat-label">Reviews</span>
+    </div>
+    <div class="stat-card">
+      <svg class="stat-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+      <span class="stat-value">{{ userStats().eventsAttended }}</span>
+      <span class="stat-label">Attended</span>
+    </div>
+    <div class="stat-card">
+      <svg class="stat-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <span class="stat-value">{{ userStats().avgRating }}</span>
+      <span class="stat-label">Avg Given</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'pending'"
+      (click)="setActiveTab('pending')"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+      </svg>
+      Pending
+      @if (pendingCount() > 0) {
+        <span class="tab-badge">{{ pendingCount() }}</span>
+      }
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'history'"
+      (click)="setActiveTab('history')"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+      </svg>
+      History
+      <span class="tab-count">{{ historyCount() }}</span>
+    </button>
+  </div>
+
+  <!-- Pending Events -->
+  @if (activeTab() === 'pending') {
+    <section class="events-list">
+      @if (pendingEvents().length === 0) {
+        <div class="empty-state">
+          <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <h3>All caught up!</h3>
+          <p>You've rated all your attended events</p>
+        </div>
+      } @else {
+        @for (pending of pendingEvents(); track pending.event.id) {
+          <article class="event-card">
+            <div class="event-color-bar" [style.background]="pending.event.color"></div>
+            <div class="event-content">
+              <div class="event-header">
+                <div class="event-category-icon" [style.background]="getCategoryColor(pending.event.category)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="white" [ngSwitch]="pending.event.category">
+                    <path *ngSwitchCase="'music'" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    <path *ngSwitchCase="'food'" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+                    <path *ngSwitchCase="'culture'" d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+                    <path *ngSwitchCase="'sports'" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    <path *ngSwitchCase="'art'" d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                  </svg>
+                </div>
+                <div class="event-info">
+                  <h3 class="event-title">{{ pending.event.title }}</h3>
+                  <p class="event-subtitle">{{ pending.event.subtitle }}</p>
+                </div>
+              </div>
+              <div class="event-meta">
+                <span class="meta-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  {{ pending.event.city }}
+                </span>
+                <span class="meta-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                  </svg>
+                  {{ formatDate(pending.event.date) }}
+                </span>
+              </div>
+              <div class="event-actions">
+                @if (!pending.checkedIn) {
+                  <button class="btn btn-outline" (click)="checkIn(pending.event.id)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Check In
+                  </button>
+                } @else {
+                  <span class="checked-in-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Checked In
+                  </span>
+                }
+                <button class="btn btn-primary" (click)="openRatingModal(pending.event)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  Rate Event
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      }
+    </section>
+  }
+
+  <!-- Rating History -->
+  @if (activeTab() === 'history') {
+    <section class="events-list">
+      @if (ratingHistory().length === 0) {
+        <div class="empty-state">
+          <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+          <h3>No ratings yet</h3>
+          <p>Start rating events to build your history</p>
+        </div>
+      } @else {
+        @for (rating of ratingHistory(); track rating.id) {
+          <article class="rating-card">
+            <div class="event-color-bar" [style.background]="rating.event.color"></div>
+            <div class="rating-content">
+              <div class="rating-header">
+                <div class="event-category-icon small" [style.background]="getCategoryColor(rating.event.category)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="white" [ngSwitch]="rating.event.category">
+                    <path *ngSwitchCase="'music'" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    <path *ngSwitchCase="'food'" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+                    <path *ngSwitchCase="'culture'" d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/>
+                    <path *ngSwitchCase="'sports'" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/>
+                    <path *ngSwitchCase="'art'" d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9z"/>
+                  </svg>
+                </div>
+                <div class="rating-info">
+                  <h3 class="event-title">{{ rating.event.title }}</h3>
+                  <p class="event-subtitle">{{ rating.event.city }} · {{ formatDate(rating.event.date) }}</p>
+                </div>
+                <div class="rating-score">
+                  <span class="score-value">{{ rating.score }}</span>
+                  <svg class="score-star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              @if (rating.review) {
+                <p class="rating-review">"{{ rating.review }}"</p>
+              }
+              
+              <div class="rating-footer">
+                <div class="rating-stars">
+                  @for (star of getStarsArray(rating.score); track $index) {
+                    <svg class="star filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                  }
+                  @for (star of getEmptyStarsArray(rating.score); track $index) {
+                    <svg class="star empty" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/>
+                    </svg>
+                  }
+                </div>
+                <span class="rating-date">{{ formatDateTime(rating.createdAt) }}</span>
+                @if (rating.wasPresent) {
+                  <span class="present-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Attended
+                  </span>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      }
+    </section>
+  }
+</div>
+
+<!-- Rating Modal -->
+@if (showRatingModal() && selectedEvent()) {
+  <div class="modal-overlay" (click)="closeRatingModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeRatingModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+      
+      <div class="modal-header" [style.background]="selectedEvent()!.color">
+        <h2 class="modal-title">{{ selectedEvent()!.title }}</h2>
+        <p class="modal-subtitle">{{ selectedEvent()!.subtitle }}</p>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Star Rating -->
+        <div class="rating-section">
+          <label class="rating-label">Your Rating</label>
+          <div class="star-selector">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button 
+                class="star-btn" 
+                [class.active]="ratingScore() >= star"
+                (click)="setRating(star)"
+              >
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+              </button>
+            }
+          </div>
+          <span class="rating-text">
+            @switch (ratingScore()) {
+              @case (1) { Poor }
+              @case (2) { Fair }
+              @case (3) { Good }
+              @case (4) { Very Good }
+              @case (5) { Excellent! }
+              @default { Select a rating }
+            }
+          </span>
+        </div>
+
+        <!-- Review Text -->
+        <div class="review-section">
+          <label class="review-label">Write a Review (Optional)</label>
+          <textarea 
+            class="review-input"
+            placeholder="Share your experience..."
+            [value]="ratingReview()"
+            (input)="updateReview($event)"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <!-- Attendance Toggle -->
+        <div class="attendance-section">
+          <button class="attendance-toggle" [class.active]="wasPresent()" (click)="togglePresent()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              @if (wasPresent()) {
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              } @else {
+                <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+              }
+            </svg>
+            <span>I attended this event</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-cancel" (click)="closeRatingModal()">Cancel</button>
+        <button 
+          class="btn btn-submit" 
+          [disabled]="ratingScore() === 0"
+          (click)="submitRating()"
+        >
+          Submit Rating
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
