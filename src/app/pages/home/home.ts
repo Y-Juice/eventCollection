@@ -48,12 +48,12 @@ export class Home {
 
   // Categories
   protected readonly categories = signal<Category[]>([
-    { id: 'all', name: 'All', color: '#7B68C8' },
-    { id: 'music', name: 'Music', color: '#FF6B5B' },
-    { id: 'food', name: 'Food', color: '#FFD93D' },
-    { id: 'culture', name: 'Culture', color: '#9B7EDE' },
-    { id: 'sports', name: 'Sports', color: '#6BCAB3' },
-    { id: 'art', name: 'Art', color: '#FFB5C5' }
+    { id: 'all', name: 'All', color: '#000000' },
+    { id: 'music', name: 'Music', color: '#FF8A65' },
+    { id: 'food', name: 'Food', color: '#90A4AE' },
+    { id: 'culture', name: 'Culture', color: '#BA68C8' },
+    { id: 'sports', name: 'Sports', color: '#4DB6AC' },
+    { id: 'art', name: 'Art', color: '#F48FB1' }
   ]);
 
   protected readonly selectedCategory = signal<string>('all');
@@ -73,7 +73,7 @@ export class Home {
       rating: 4.8,
       reviewCount: 156,
       visitorCount: 420,
-      color: '#FF6B5B'
+      color: '#FF8A65'
     },
     {
       id: 2,
@@ -87,7 +87,7 @@ export class Home {
       rating: 4.5,
       reviewCount: 312,
       visitorCount: 2800,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     {
       id: 3,
@@ -101,7 +101,7 @@ export class Home {
       rating: 4.9,
       reviewCount: 89,
       visitorCount: 650,
-      color: '#FFB5C5'
+      color: '#F48FB1'
     },
     {
       id: 4,
@@ -115,7 +115,7 @@ export class Home {
       rating: 4.7,
       reviewCount: 67,
       visitorCount: 380,
-      color: '#9B7EDE'
+      color: '#BA68C8'
     },
     {
       id: 5,
@@ -129,7 +129,7 @@ export class Home {
       rating: 4.3,
       reviewCount: 234,
       visitorCount: 18500,
-      color: '#6BCAB3'
+      color: '#4DB6AC'
     },
     {
       id: 6,
@@ -143,7 +143,7 @@ export class Home {
       rating: 4.6,
       reviewCount: 198,
       visitorCount: 890,
-      color: '#FF6B5B'
+      color: '#FF8A65'
     },
     // Antwerp Events
     {
@@ -158,7 +158,7 @@ export class Home {
       rating: 4.8,
       reviewCount: 78,
       visitorCount: 320,
-      color: '#9B7EDE'
+      color: '#BA68C8'
     },
     {
       id: 8,
@@ -172,7 +172,7 @@ export class Home {
       rating: 4.4,
       reviewCount: 256,
       visitorCount: 1850,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     {
       id: 9,
@@ -186,7 +186,7 @@ export class Home {
       rating: 4.9,
       reviewCount: 145,
       visitorCount: 520,
-      color: '#FFB5C5'
+      color: '#F48FB1'
     },
     {
       id: 10,
@@ -200,7 +200,7 @@ export class Home {
       rating: 4.2,
       reviewCount: 89,
       visitorCount: 3200,
-      color: '#6BCAB3'
+      color: '#4DB6AC'
     },
     // Ghent Events
     {
@@ -215,7 +215,7 @@ export class Home {
       rating: 4.9,
       reviewCount: 423,
       visitorCount: 5600,
-      color: '#9B7EDE'
+      color: '#BA68C8'
     },
     {
       id: 12,
@@ -229,7 +229,7 @@ export class Home {
       rating: 4.6,
       reviewCount: 167,
       visitorCount: 980,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     {
       id: 13,
@@ -243,7 +243,7 @@ export class Home {
       rating: 4.5,
       reviewCount: 112,
       visitorCount: 650,
-      color: '#FF6B5B'
+      color: '#FF8A65'
     },
     // Bruges Events
     {
@@ -258,7 +258,7 @@ export class Home {
       rating: 4.7,
       reviewCount: 289,
       visitorCount: 450,
-      color: '#9B7EDE'
+      color: '#BA68C8'
     },
     {
       id: 15,
@@ -272,7 +272,7 @@ export class Home {
       rating: 4.8,
       reviewCount: 134,
       visitorCount: 85,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     // Leuven Events
     {
@@ -287,7 +287,7 @@ export class Home {
       rating: 4.3,
       reviewCount: 567,
       visitorCount: 3200,
-      color: '#FF6B5B'
+      color: '#FF8A65'
     },
     {
       id: 17,
@@ -301,7 +301,7 @@ export class Home {
       rating: 4.6,
       reviewCount: 198,
       visitorCount: 280,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     // Liège Events
     {
@@ -316,7 +316,7 @@ export class Home {
       rating: 4.5,
       reviewCount: 345,
       visitorCount: 4200,
-      color: '#FFD93D'
+      color: '#90A4AE'
     },
     {
       id: 19,
@@ -330,7 +330,7 @@ export class Home {
       rating: 4.8,
       reviewCount: 56,
       visitorCount: 420,
-      color: '#9B7EDE'
+      color: '#BA68C8'
     }
   ]);
 
