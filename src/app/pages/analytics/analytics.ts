@@ -1,5 +1,6 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SupabaseService, EventWithRelations, Category, City } from '../../services/supabase.service';
 
 interface CategoryStats {
   id: string;
@@ -52,76 +53,294 @@ interface QualityEvent {
   templateUrl: './analytics.html',
   styleUrl: './analytics.css'
 })
-export class Analytics {
+export class Analytics implements OnInit {
+  private supabase = inject(SupabaseService);
+  protected readonly loading = signal<boolean>(true);
+  
   // Overall stats
   protected readonly overallStats = signal({
-    totalEvents: 167,
-    totalVisitors: 48520,
-    totalRatings: 3847,
-    avgRating: 4.52,
-    dropOffRate: 23.5,
-    engagementRate: 76.5
+    totalEvents: 0,
+    totalVisitors: 0,
+    totalRatings: 0,
+    avgRating: 0,
+    dropOffRate: 0,
+    engagementRate: 0
   });
 
+  protected readonly allEvents = signal<EventWithRelations[]>([]);
+  protected readonly categories = signal<Category[]>([]);
+  protected readonly cities = signal<City[]>([]);
+
   // Category statistics
-  protected readonly categoryStats = signal<CategoryStats[]>([
-    { id: 'music', name: 'Music', color: '#FF6B5B', eventCount: 45, avgRating: 4.5, totalVisitors: 12400, totalReviews: 1023 },
-    { id: 'food', name: 'Food', color: '#FFD93D', eventCount: 38, avgRating: 4.4, totalVisitors: 15200, totalReviews: 987 },
-    { id: 'culture', name: 'Culture', color: '#9B7EDE', eventCount: 32, avgRating: 4.7, totalVisitors: 8900, totalReviews: 756 },
-    { id: 'sports', name: 'Sports', color: '#6BCAB3', eventCount: 28, avgRating: 4.3, totalVisitors: 9800, totalReviews: 654 },
-    { id: 'art', name: 'Art', color: '#FFB5C5', eventCount: 24, avgRating: 4.6, totalVisitors: 2220, totalReviews: 427 }
-  ]);
+  protected readonly categoryStats = signal<CategoryStats[]>([]);
 
   // City statistics
-  protected readonly cityStats = signal<CityStats[]>([
-    { name: 'Brussels', eventCount: 47, avgRating: 4.6, totalVisitors: 18500, engagementRate: 82 },
-    { name: 'Antwerp', eventCount: 35, avgRating: 4.5, totalVisitors: 12300, engagementRate: 78 },
-    { name: 'Ghent', eventCount: 28, avgRating: 4.7, totalVisitors: 9800, engagementRate: 85 },
-    { name: 'Bruges', eventCount: 22, avgRating: 4.4, totalVisitors: 4200, engagementRate: 71 },
-    { name: 'Leuven', eventCount: 19, avgRating: 4.3, totalVisitors: 2400, engagementRate: 68 },
-    { name: 'Liège', eventCount: 16, avgRating: 4.5, totalVisitors: 1320, engagementRate: 74 }
-  ]);
+  protected readonly cityStats = signal<CityStats[]>([]);
 
   // Top 5 popular events
-  protected readonly topEvents = signal<TopEvent[]>([
-    { id: 5, title: 'RSC Anderlecht vs Club Brugge', city: 'Brussels', category: 'sports', visitors: 18500, rating: 4.3, reviews: 234, color: '#6BCAB3' },
-    { id: 11, title: 'Light Festival', city: 'Ghent', category: 'culture', visitors: 5600, rating: 4.9, reviews: 423, color: '#9B7EDE' },
-    { id: 18, title: 'Village de Noël', city: 'Liège', category: 'food', visitors: 4200, rating: 4.5, reviews: 345, color: '#FFD93D' },
-    { id: 10, title: 'Antwerp Giants', city: 'Antwerp', category: 'sports', visitors: 3200, rating: 4.2, reviews: 89, color: '#6BCAB3' },
-    { id: 16, title: 'Student Fest', city: 'Leuven', category: 'music', visitors: 3200, rating: 4.3, reviews: 567, color: '#FF6B5B' }
-  ]);
+  protected readonly topEvents = signal<TopEvent[]>([]);
 
   // Monthly data
-  protected readonly monthlyData = signal<MonthlyData[]>([
-    { month: 'July', shortMonth: 'Jul', eventCount: 12, avgRating: 4.3 },
-    { month: 'August', shortMonth: 'Aug', eventCount: 18, avgRating: 4.4 },
-    { month: 'September', shortMonth: 'Sep', eventCount: 22, avgRating: 4.5 },
-    { month: 'October', shortMonth: 'Oct', eventCount: 28, avgRating: 4.4 },
-    { month: 'November', shortMonth: 'Nov', eventCount: 35, avgRating: 4.6 },
-    { month: 'December', shortMonth: 'Dec', eventCount: 52, avgRating: 4.7 }
-  ]);
+  protected readonly monthlyData = signal<MonthlyData[]>([]);
 
   // Quality vs Quantity analysis (high visitors, low ratings)
-  protected readonly qualityIssues = signal<QualityEvent[]>([
-    { id: 5, title: 'RSC Anderlecht', visitors: 18500, rating: 4.3, category: 'sports', color: '#6BCAB3' },
-    { id: 10, title: 'Antwerp Giants', visitors: 3200, rating: 4.2, category: 'sports', color: '#6BCAB3' },
-    { id: 16, title: 'Student Fest', visitors: 3200, rating: 4.3, category: 'music', color: '#FF6B5B' }
-  ]);
+  protected readonly qualityIssues = signal<QualityEvent[]>([]);
 
   // Low engagement events (many views, few ratings)
-  protected readonly lowEngagement = signal([
-    { title: 'Canal Cruise', views: 1250, ratings: 289, rate: 23.1 },
-    { title: 'Beer Tasting', views: 890, ratings: 198, rate: 22.2 },
-    { title: 'Opera Night', views: 320, ratings: 56, rate: 17.5 }
-  ]);
+  protected readonly lowEngagement = signal<Array<{title: string, views: number, ratings: number, rate: number}>>([]);
 
   // Time analysis
-  protected readonly timeAnalysis = signal([
-    { day: 'Friday', avgRating: 4.7, eventCount: 38 },
-    { day: 'Saturday', avgRating: 4.6, eventCount: 45 },
-    { day: 'Sunday', avgRating: 4.4, eventCount: 32 },
-    { day: 'Weekdays', avgRating: 4.3, eventCount: 52 }
-  ]);
+  protected readonly timeAnalysis = signal<Array<{day: string, avgRating: number, eventCount: number}>>([]);
+
+  async ngOnInit() {
+    try {
+      await this.loadData();
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async loadData() {
+    // Load all events
+    const events = await this.supabase.getEvents();
+    this.allEvents.set(events);
+
+    // Load categories
+    const categoriesData = await this.supabase.getCategories();
+    this.categories.set(categoriesData);
+
+    // Load cities
+    const citiesData = await this.supabase.getCities();
+    this.cities.set(citiesData);
+
+    // Calculate overall stats
+    this.calculateOverallStats(events);
+
+    // Calculate category stats
+    this.calculateCategoryStats(events, categoriesData);
+
+    // Calculate city stats
+    this.calculateCityStats(events, citiesData);
+
+    // Calculate top events
+    this.calculateTopEvents(events);
+
+    // Calculate monthly data
+    this.calculateMonthlyData(events);
+
+    // Calculate quality issues
+    this.calculateQualityIssues(events);
+
+    // Calculate low engagement
+    this.calculateLowEngagement(events);
+
+    // Calculate time analysis
+    this.calculateTimeAnalysis(events);
+  }
+
+  calculateOverallStats(events: EventWithRelations[]) {
+    const totalEvents = events.length;
+    const totalVisitors = events.reduce((sum, e) => sum + (e.visitor_count || 0), 0);
+    const totalRatings = events.reduce((sum, e) => sum + (e.review_count || 0), 0);
+    const avgRating = events.length > 0
+      ? events.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / events.length
+      : 0;
+    
+    const totalViews = events.reduce((sum, e) => sum + (e.view_count || 0), 0);
+    const engagementRate = totalViews > 0 ? (totalRatings / totalViews) * 100 : 0;
+    const dropOffRate = 100 - engagementRate;
+
+    this.overallStats.set({
+      totalEvents,
+      totalVisitors,
+      totalRatings,
+      avgRating: parseFloat(avgRating.toFixed(2)),
+      dropOffRate: parseFloat(dropOffRate.toFixed(1)),
+      engagementRate: parseFloat(engagementRate.toFixed(1))
+    });
+  }
+
+  calculateCategoryStats(events: EventWithRelations[], categories: Category[]) {
+    const stats = categories.map(cat => {
+      const categoryEvents = events.filter(e => e.category_id === cat.id);
+      const eventCount = categoryEvents.length;
+      const totalVisitors = categoryEvents.reduce((sum, e) => sum + (e.visitor_count || 0), 0);
+      const totalReviews = categoryEvents.reduce((sum, e) => sum + (e.review_count || 0), 0);
+      const avgRating = eventCount > 0
+        ? categoryEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / eventCount
+        : 0;
+
+      return {
+        id: cat.id,
+        name: cat.name,
+        color: cat.color,
+        eventCount,
+        avgRating: parseFloat(avgRating.toFixed(1)),
+        totalVisitors,
+        totalReviews
+      };
+    });
+
+    this.categoryStats.set(stats);
+  }
+
+  calculateCityStats(events: EventWithRelations[], cities: City[]) {
+    const stats = cities.map(city => {
+      const cityEvents = events.filter(e => e.city_id === city.id);
+      const eventCount = cityEvents.length;
+      const totalVisitors = cityEvents.reduce((sum, e) => sum + (e.visitor_count || 0), 0);
+      const avgRating = eventCount > 0
+        ? cityEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / eventCount
+        : 0;
+      
+      const totalViews = cityEvents.reduce((sum, e) => sum + (e.view_count || 0), 0);
+      const totalRatings = cityEvents.reduce((sum, e) => sum + (e.review_count || 0), 0);
+      const engagementRate = totalViews > 0 ? (totalRatings / totalViews) * 100 : 0;
+
+      return {
+        name: city.name,
+        eventCount,
+        avgRating: parseFloat(avgRating.toFixed(1)),
+        totalVisitors,
+        engagementRate: parseFloat(engagementRate.toFixed(0))
+      };
+    });
+
+    this.cityStats.set(stats);
+  }
+
+  calculateTopEvents(events: EventWithRelations[]) {
+    const sorted = [...events].sort((a, b) => (b.visitor_count || 0) - (a.visitor_count || 0));
+    const top5 = sorted.slice(0, 5).map((e, index) => ({
+      id: index + 1,
+      title: e.title,
+      city: e.city?.name || '',
+      category: e.category_id,
+      visitors: e.visitor_count || 0,
+      rating: e.avg_rating || 0,
+      reviews: e.review_count || 0,
+      color: e.color
+    }));
+
+    this.topEvents.set(top5);
+  }
+
+  calculateMonthlyData(events: EventWithRelations[]) {
+    const monthMap = new Map<string, {count: number, ratings: number[]}>();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    events.forEach(event => {
+      const date = new Date(event.event_date);
+      const month = monthNames[date.getMonth()];
+      const shortMonth = shortMonths[date.getMonth()];
+      
+      if (!monthMap.has(month)) {
+        monthMap.set(month, { count: 0, ratings: [] });
+      }
+      
+      const data = monthMap.get(month)!;
+      data.count++;
+      if (event.avg_rating) {
+        data.ratings.push(event.avg_rating);
+      }
+    });
+
+    const monthlyData = Array.from(monthMap.entries()).map(([month, data]) => {
+      const monthIndex = monthNames.indexOf(month);
+      const avgRating = data.ratings.length > 0
+        ? data.ratings.reduce((sum, r) => sum + r, 0) / data.ratings.length
+        : 0;
+
+      return {
+        month,
+        shortMonth: shortMonths[monthIndex],
+        eventCount: data.count,
+        avgRating: parseFloat(avgRating.toFixed(1))
+      };
+    }).sort((a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month));
+
+    this.monthlyData.set(monthlyData);
+  }
+
+  calculateQualityIssues(events: EventWithRelations[]) {
+    const issues = events
+      .filter(e => (e.visitor_count || 0) > 1000 && (e.avg_rating || 0) < 4.5)
+      .sort((a, b) => (b.visitor_count || 0) - (a.visitor_count || 0))
+      .slice(0, 3)
+      .map((e, index) => ({
+        id: index + 1,
+        title: e.title,
+        visitors: e.visitor_count || 0,
+        rating: e.avg_rating || 0,
+        category: e.category_id,
+        color: e.color
+      }));
+
+    this.qualityIssues.set(issues);
+  }
+
+  calculateLowEngagement(events: EventWithRelations[]) {
+    const lowEng = events
+      .filter(e => (e.view_count || 0) > 0 && (e.review_count || 0) > 0)
+      .map(e => {
+        const rate = (e.review_count || 0) / (e.view_count || 1) * 100;
+        return {
+          title: e.title,
+          views: e.view_count || 0,
+          ratings: e.review_count || 0,
+          rate: parseFloat(rate.toFixed(1))
+        };
+      })
+      .filter(e => e.rate < 30)
+      .sort((a, b) => a.rate - b.rate)
+      .slice(0, 3);
+
+    this.lowEngagement.set(lowEng);
+  }
+
+  calculateTimeAnalysis(events: EventWithRelations[]) {
+    const dayMap = new Map<string, {ratings: number[], count: number}>();
+    
+    events.forEach(event => {
+      const date = new Date(event.event_date);
+      const dayOfWeek = date.getDay();
+      let dayName = '';
+      
+      if (dayOfWeek === 5) dayName = 'Friday';
+      else if (dayOfWeek === 6) dayName = 'Saturday';
+      else if (dayOfWeek === 0) dayName = 'Sunday';
+      else dayName = 'Weekdays';
+
+      if (!dayMap.has(dayName)) {
+        dayMap.set(dayName, { ratings: [], count: 0 });
+      }
+
+      const data = dayMap.get(dayName)!;
+      data.count++;
+      if (event.avg_rating) {
+        data.ratings.push(event.avg_rating);
+      }
+    });
+
+    const timeAnalysis = Array.from(dayMap.entries()).map(([day, data]) => {
+      const avgRating = data.ratings.length > 0
+        ? data.ratings.reduce((sum, r) => sum + r, 0) / data.ratings.length
+        : 0;
+
+      return {
+        day,
+        avgRating: parseFloat(avgRating.toFixed(1)),
+        eventCount: data.count
+      };
+    });
+
+    this.timeAnalysis.set(timeAnalysis);
+  }
 
   // Computed values
   protected readonly maxMonthlyEvents = computed(() => 
@@ -178,4 +397,5 @@ export class Analytics {
     return colors[category] || '#7B68C8';
   }
 }
+
 

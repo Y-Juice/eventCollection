@@ -1,30 +1,10 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Event {
-  id: number;
-  title: string;
-  subtitle: string;
-  category: 'music' | 'food' | 'culture' | 'sports' | 'art';
-  city: string;
-  neighborhood: string;
-  date: string;
-  color: string;
-}
-
-interface UserRating {
-  id: number;
-  eventId: number;
-  event: Event;
-  score: number;
-  review: string;
-  createdAt: string;
-  wasPresent: boolean;
-}
+import { SupabaseService, EventWithRelations, Rating } from '../../services/supabase.service';
 
 interface PendingEvent {
-  event: Event;
+  event: EventWithRelations;
   checkedIn: boolean;
 }
 
@@ -34,171 +14,71 @@ interface PendingEvent {
   templateUrl: './ratings.html',
   styleUrl: './ratings.css'
 })
-export class Ratings {
+export class Ratings implements OnInit {
+  private supabase = inject(SupabaseService);
+  protected readonly loading = signal<boolean>(true);
   protected readonly activeTab = signal<'pending' | 'history'>('pending');
   protected readonly showRatingModal = signal<boolean>(false);
-  protected readonly selectedEvent = signal<Event | null>(null);
+  protected readonly selectedEvent = signal<EventWithRelations | null>(null);
   protected readonly ratingScore = signal<number>(0);
   protected readonly ratingReview = signal<string>('');
   protected readonly wasPresent = signal<boolean>(true);
 
   // User stats
   protected readonly userStats = signal({
-    totalRatings: 12,
-    totalReviews: 8,
-    eventsAttended: 15,
-    avgRating: 4.3
+    totalRatings: 0,
+    totalReviews: 0,
+    eventsAttended: 0,
+    avgRating: 0
   });
 
   // Events user has checked into but not rated yet
-  protected readonly pendingEvents = signal<PendingEvent[]>([
-    {
-      event: {
-        id: 1,
-        title: 'Jazz Nights',
-        subtitle: 'Live at Flagey',
-        category: 'music',
-        city: 'Brussels',
-        neighborhood: 'Ixelles',
-        date: '2024-12-28',
-        color: '#FF6B5B'
-      },
-      checkedIn: true
-    },
-    {
-      event: {
-        id: 11,
-        title: 'Light Festival',
-        subtitle: 'City Center',
-        category: 'culture',
-        city: 'Ghent',
-        neighborhood: 'Korenmarkt',
-        date: '2024-12-23',
-        color: '#9B7EDE'
-      },
-      checkedIn: true
-    },
-    {
-      event: {
-        id: 2,
-        title: 'Winter Market',
-        subtitle: 'Grand Place',
-        category: 'food',
-        city: 'Brussels',
-        neighborhood: 'City Center',
-        date: '2024-12-20',
-        color: '#FFD93D'
-      },
-      checkedIn: false
-    },
-    {
-      event: {
-        id: 15,
-        title: 'Chocolate Tour',
-        subtitle: 'Master Class',
-        category: 'food',
-        city: 'Bruges',
-        neighborhood: 'Markt',
-        date: '2024-12-22',
-        color: '#FFD93D'
-      },
-      checkedIn: false
-    }
-  ]);
+  protected readonly pendingEvents = signal<PendingEvent[]>([]);
 
   // User's rating history
-  protected readonly ratingHistory = signal<UserRating[]>([
-    {
-      id: 1,
-      eventId: 3,
-      event: {
-        id: 3,
-        title: 'Magritte Expo',
-        subtitle: 'Royal Museums',
-        category: 'art',
-        city: 'Brussels',
-        neighborhood: 'Sablon',
-        date: '2024-12-15',
-        color: '#FFB5C5'
-      },
-      score: 5,
-      review: 'Absolutely stunning exhibition! The surrealist masterpieces were breathtaking. A must-see for any art lover.',
-      createdAt: '2024-12-15T18:30:00',
-      wasPresent: true
-    },
-    {
-      id: 2,
-      eventId: 8,
-      event: {
-        id: 8,
-        title: 'Street Food Fest',
-        subtitle: 'Park Spoor Noord',
-        category: 'food',
-        city: 'Antwerp',
-        neighborhood: 'Dam',
-        date: '2024-12-21',
-        color: '#FFD93D'
-      },
-      score: 4,
-      review: 'Great variety of food trucks. The atmosphere was amazing but it got quite crowded.',
-      createdAt: '2024-12-21T20:15:00',
-      wasPresent: true
-    },
-    {
-      id: 3,
-      eventId: 4,
-      event: {
-        id: 4,
-        title: 'Theatre Night',
-        subtitle: 'La Monnaie',
-        category: 'culture',
-        city: 'Brussels',
-        neighborhood: 'City Center',
-        date: '2024-12-22',
-        color: '#9B7EDE'
-      },
-      score: 5,
-      review: 'Outstanding performance! The acoustics were perfect and the cast was phenomenal.',
-      createdAt: '2024-12-22T23:00:00',
-      wasPresent: true
-    },
-    {
-      id: 4,
-      eventId: 12,
-      event: {
-        id: 12,
-        title: 'Veggie World',
-        subtitle: 'Plant-based Festival',
-        category: 'food',
-        city: 'Ghent',
-        neighborhood: 'Sint-Pieters',
-        date: '2024-12-19',
-        color: '#FFD93D'
-      },
-      score: 4,
-      review: 'Delicious plant-based options. Learned a lot from the cooking demos!',
-      createdAt: '2024-12-19T16:45:00',
-      wasPresent: true
-    },
-    {
-      id: 5,
-      eventId: 6,
-      event: {
-        id: 6,
-        title: 'Techno Warehouse',
-        subtitle: 'Fuse Club',
-        category: 'music',
-        city: 'Brussels',
-        neighborhood: 'Marolles',
-        date: '2024-12-31',
-        color: '#FF6B5B'
-      },
-      score: 5,
-      review: '',
-      createdAt: '2024-12-31T04:30:00',
-      wasPresent: true
+  protected readonly ratingHistory = signal<Rating[]>([]);
+
+  async ngOnInit() {
+    try {
+      await this.loadData();
+    } catch (error) {
+      console.error('Error loading ratings data:', error);
+    } finally {
+      this.loading.set(false);
     }
-  ]);
+  }
+
+  async loadData() {
+    // Load user ratings
+    const ratings = await this.supabase.getUserRatings();
+    this.ratingHistory.set(ratings);
+
+    // Load pending events (visited but not rated)
+    const pending = await this.supabase.getUserPendingRatings();
+    const visits = await this.supabase.getUserVisits();
+    const visitEventIds = new Set(visits.map(v => v.event_id));
+    
+    const pendingEvents = pending.map(event => ({
+      event,
+      checkedIn: visitEventIds.has(event.id)
+    }));
+    this.pendingEvents.set(pendingEvents);
+
+    // Calculate user stats
+    const totalRatings = ratings.length;
+    const totalReviews = ratings.filter(r => r.review && r.review.trim() !== '').length;
+    const eventsAttended = visits.length;
+    const avgRating = totalRatings > 0
+      ? ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings
+      : 0;
+
+    this.userStats.set({
+      totalRatings,
+      totalReviews,
+      eventsAttended,
+      avgRating: parseFloat(avgRating.toFixed(1))
+    });
+  }
 
   // Computed values
   protected readonly pendingCount = computed(() => 
@@ -211,14 +91,19 @@ export class Ratings {
     this.activeTab.set(tab);
   }
 
-  checkIn(eventId: number): void {
-    const updated = this.pendingEvents().map(p => 
-      p.event.id === eventId ? { ...p, checkedIn: true } : p
-    );
-    this.pendingEvents.set(updated);
+  async checkIn(eventId: string): Promise<void> {
+    try {
+      await this.supabase.checkIn(eventId);
+      const updated = this.pendingEvents().map(p => 
+        p.event.id === eventId ? { ...p, checkedIn: true } : p
+      );
+      this.pendingEvents.set(updated);
+    } catch (error) {
+      console.error('Error checking in:', error);
+    }
   }
 
-  openRatingModal(event: Event): void {
+  openRatingModal(event: EventWithRelations): void {
     this.selectedEvent.set(event);
     this.ratingScore.set(0);
     this.ratingReview.set('');
@@ -243,39 +128,26 @@ export class Ratings {
     this.wasPresent.set(!this.wasPresent());
   }
 
-  submitRating(): void {
+  async submitRating(): Promise<void> {
     const event = this.selectedEvent();
     if (!event || this.ratingScore() === 0) return;
 
-    // Create new rating
-    const newRating: UserRating = {
-      id: Date.now(),
-      eventId: event.id,
-      event: event,
-      score: this.ratingScore(),
-      review: this.ratingReview(),
-      createdAt: new Date().toISOString(),
-      wasPresent: this.wasPresent()
-    };
+    try {
+      // Create rating in Supabase
+      const newRating = await this.supabase.createRating(
+        event.id,
+        this.ratingScore(),
+        this.ratingReview() || undefined,
+        this.wasPresent()
+      );
 
-    // Add to history
-    this.ratingHistory.set([newRating, ...this.ratingHistory()]);
+      // Reload data
+      await this.loadData();
 
-    // Remove from pending
-    this.pendingEvents.set(
-      this.pendingEvents().filter(p => p.event.id !== event.id)
-    );
-
-    // Update stats
-    const stats = this.userStats();
-    this.userStats.set({
-      ...stats,
-      totalRatings: stats.totalRatings + 1,
-      totalReviews: this.ratingReview() ? stats.totalReviews + 1 : stats.totalReviews,
-      eventsAttended: this.wasPresent() ? stats.eventsAttended + 1 : stats.eventsAttended
-    });
-
-    this.closeRatingModal();
+      this.closeRatingModal();
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    }
   }
 
   formatDate(dateStr: string): string {
@@ -301,7 +173,11 @@ export class Ratings {
     return Array(5 - count).fill(0);
   }
 
-  getCategoryColor(category: string): string {
+  getCategoryColor(categoryId: string): string {
+    const event = this.selectedEvent();
+    if (event?.category) {
+      return event.category.color;
+    }
     const colors: Record<string, string> = {
       music: '#FF6B5B',
       food: '#FFD93D',
@@ -309,7 +185,20 @@ export class Ratings {
       sports: '#6BCAB3',
       art: '#FFB5C5'
     };
-    return colors[category] || '#7B68C8';
+    return colors[categoryId] || '#7B68C8';
+  }
+
+  getEventCategoryId(event: EventWithRelations): string {
+    return event.category_id;
+  }
+
+  getEventCityName(event: EventWithRelations): string {
+    return event.city?.name || '';
+  }
+
+  getEventDate(event: EventWithRelations): string {
+    return event.event_date;
   }
 }
+
 
