@@ -190,6 +190,50 @@
   text-align: right;
 }
 
+.bar-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  min-width: 100px;
+}
+
+.bar-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.bar-rating svg {
+  fill: #FFB800;
+  width: 10px;
+  height: 10px;
+}
+
+.bar-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  min-width: 100px;
+}
+
+.bar-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.bar-rating svg {
+  fill: #FFB800;
+  width: 10px;
+  height: 10px;
+}
+
 /* Donut Chart */
 .donut-chart-container {
   position: relative;
@@ -566,6 +610,108 @@
 
 .table-gap.negative {
   color: #F44336;
+}
+
+/* Map Visualization */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.belgium-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-marker {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.map-marker:hover {
+  opacity: 1 !important;
+}
+
+.marker-circle {
+  stroke: white;
+  stroke-width: 2;
+  transition: r 0.2s;
+}
+
+.map-marker:hover .marker-circle {
+  r: 16;
+}
+
+.map-legend {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1A1A2E;
+  margin-bottom: 8px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-marker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+}
+
+.legend-marker circle {
+  fill: currentColor;
+}
+
+/* Scatterplot */
+.scatterplot-container {
+  width: 100%;
+  height: 400px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  overflow: visible;
+}
+
+.scatterplot {
+  width: 100%;
+  height: 100%;
+}
+
+.scatter-point {
+  cursor: pointer;
+  transition: r 0.2s;
+}
+
+.scatter-point:hover {
+  r: 8;
+  opacity: 1 !important;
+}
+
+.ranking-visitors {
+  font-size: 11px;
+  color: #666;
+  margin-left: 8px;
 }
 
 /* ========================================

@@ -64,7 +64,7 @@
           </svg>
           Top 5 Popular Events
         </h2>
-        <span class="chart-subtitle">By visitor count</span>
+        <span class="chart-subtitle">Op basis van ratings en bezoekers</span>
       </div>
       <div class="bar-chart">
         @for (event of topEvents(); track event.id) {
@@ -76,26 +76,34 @@
             <div class="bar-container">
               <div 
                 class="bar-fill" 
-                [style.width.%]="getBarWidth(event.visitors, maxVisitors())"
+                [style.width.%]="getBarWidth(event.popularityScore, maxPopularityScore())"
                 [style.background]="event.color"
               ></div>
             </div>
-            <span class="bar-value">{{ formatNumber(event.visitors) }}</span>
+            <div class="bar-stats">
+              <span class="bar-value">{{ formatNumber(event.visitors) }} bezoekers</span>
+              <span class="bar-rating">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                {{ event.rating.toFixed(1) }} ({{ event.reviews }})
+              </span>
+            </div>
           </div>
         }
       </div>
     </section>
 
-    <!-- Category Distribution - Donut Chart -->
+    <!-- Average Rating per Category - Donut Chart -->
     <section class="chart-card">
       <div class="chart-header">
         <h2 class="chart-title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2.03 0v8.99H22c-.47-4.74-4.24-8.52-8.97-8.99zm0 11.01V22c4.74-.47 8.5-4.25 8.97-8.99h-8.97z"/>
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
           </svg>
-          Events by Category
+          Gemiddelde Rating per Categorie
         </h2>
-        <span class="chart-subtitle">Distribution</span>
+        <span class="chart-subtitle">Donut chart</span>
       </div>
       <div class="donut-chart-container">
         <svg class="donut-chart" viewBox="0 0 42 42">
@@ -109,14 +117,14 @@
               fill="transparent"
               [attr.stroke]="category.color"
               stroke-width="5"
-              [attr.stroke-dasharray]="getDonutDashArray(category.eventCount)"
-              [attr.stroke-dashoffset]="getDonutOffset(i)"
+              [attr.stroke-dasharray]="getDonutDashArrayByRating(category.avgRating)"
+              [attr.stroke-dashoffset]="getDonutOffsetByRating(i)"
             />
           }
         </svg>
         <div class="donut-center">
-          <span class="donut-total">{{ totalCategoryEvents() }}</span>
-          <span class="donut-label">Events</span>
+          <span class="donut-total">{{ getOverallAvgRating() }}</span>
+          <span class="donut-label">Gem. Rating</span>
         </div>
       </div>
       <div class="donut-legend">
@@ -124,7 +132,7 @@
           <div class="legend-item">
             <span class="legend-color" [style.background]="category.color"></span>
             <span class="legend-name">{{ category.name }}</span>
-            <span class="legend-value">{{ category.eventCount }}</span>
+            <span class="legend-value">{{ category.avgRating.toFixed(1) }}★</span>
           </div>
         }
       </div>
@@ -137,12 +145,12 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
           </svg>
-          City Rankings
+          Ranking per Stad
         </h2>
-        <span class="chart-subtitle">Most active cities</span>
+        <span class="chart-subtitle">Meest actieve steden op basis van events, ratings en bezoekers</span>
       </div>
       <div class="city-ranking">
-        @for (city of cityStats(); track city.name; let i = $index) {
+        @for (city of getSortedCityStats(); track city.name; let i = $index) {
           <div class="ranking-item">
             <span class="ranking-position">{{ i + 1 }}</span>
             <div class="ranking-info">
@@ -150,21 +158,127 @@
               <div class="ranking-bar-container">
                 <div 
                   class="ranking-bar" 
-                  [style.width.%]="getBarWidth(city.eventCount, maxCityEvents())"
+                  [style.width.%]="getBarWidth(city.activityScore, getMaxActivityScore())"
                 ></div>
               </div>
             </div>
             <div class="ranking-stats">
               <span class="ranking-events">{{ city.eventCount }} events</span>
+              <span class="ranking-visitors">{{ formatNumber(city.totalVisitors) }} bezoekers</span>
               <span class="ranking-rating">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
-                {{ city.avgRating }}
+                {{ city.avgRating.toFixed(1) }}
               </span>
             </div>
           </div>
         }
+      </div>
+    </section>
+
+    <!-- Map Visualization -->
+    <section class="chart-card full-width">
+      <div class="chart-header">
+        <h2 class="chart-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          Kaart van België
+        </h2>
+        <span class="chart-subtitle">Event locaties met gemiddelde rating</span>
+      </div>
+      <div class="map-container">
+        <svg class="belgium-map" viewBox="0 0 400 300">
+          <!-- Simple Belgium outline -->
+          <path d="M50 50 L350 50 L350 250 L50 250 Z" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+          <!-- City markers -->
+          @for (event of getMapEventsByCity(); track event.cityName) {
+            <g class="map-marker">
+              <circle 
+                [attr.cx]="getMapX(event.lng)" 
+                [attr.cy]="getMapY(event.lat)"
+                [attr.r]="getMarkerSize(event.avg_rating || 0)"
+                [attr.fill]="getRatingColor(event.avg_rating || 0)"
+                [attr.opacity]="0.7"
+                class="marker-circle"
+              />
+              <text 
+                [attr.x]="getMapX(event.lng)" 
+                [attr.y]="getMapY(event.lat) + 20"
+                text-anchor="middle"
+                font-size="10"
+                fill="#333"
+              >{{ event.cityName }}</text>
+              <text 
+                [attr.x]="getMapX(event.lng)" 
+                [attr.y]="getMapY(event.lat) + 32"
+                text-anchor="middle"
+                font-size="9"
+                fill="#666"
+              >{{ (event.avg_rating || 0).toFixed(1) }}★</text>
+            </g>
+          }
+        </svg>
+        <div class="map-legend">
+          <div class="legend-title">Rating</div>
+          <div class="legend-items">
+            <div class="legend-marker">
+              <circle r="8" fill="#ff4444" opacity="0.7"/>
+              <span>&lt; 3.0</span>
+            </div>
+            <div class="legend-marker">
+              <circle r="10" fill="#ffaa00" opacity="0.7"/>
+              <span>3.0-4.0</span>
+            </div>
+            <div class="legend-marker">
+              <circle r="12" fill="#44ff44" opacity="0.7"/>
+              <span>&gt; 4.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scatterplot -->
+    <section class="chart-card full-width">
+      <div class="chart-header">
+        <h2 class="chart-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+          </svg>
+          Scatterplot: Bezoekers vs Tevredenheid
+        </h2>
+        <span class="chart-subtitle">Grote events ≠ altijd goede score</span>
+      </div>
+      <div class="scatterplot-container">
+        <svg class="scatterplot" viewBox="0 0 500 400">
+          <!-- Grid lines -->
+          <line x1="50" y1="350" x2="450" y2="350" stroke="#ddd" stroke-width="1"/>
+          <line x1="50" y1="50" x2="50" y2="350" stroke="#ddd" stroke-width="1"/>
+          
+          <!-- Y-axis labels (Rating) -->
+          @for (i of [5, 4, 3, 2, 1]; track i) {
+            <text x="45" [attr.y]="350 - (i - 1) * 75" text-anchor="end" font-size="12" fill="#666">{{ i }}</text>
+            <line x1="50" [attr.y1]="350 - (i - 1) * 75" x2="450" [attr.y2]="350 - (i - 1) * 75" stroke="#eee" stroke-width="0.5"/>
+          }
+          
+          <!-- X-axis labels (Visitors) -->
+          <text x="250" y="370" text-anchor="middle" font-size="12" fill="#666">Bezoekers</text>
+          <text x="20" y="200" text-anchor="middle" font-size="12" fill="#666" transform="rotate(-90 20 200)">Rating</text>
+          
+          <!-- Data points -->
+          @for (point of scatterData(); track point.title) {
+            <circle
+              [attr.cx]="50 + (point.visitors / maxScatterVisitors()) * 400"
+              [attr.cy]="350 - ((point.rating - 1) / 4) * 300"
+              r="6"
+              [attr.fill]="point.color"
+              [attr.opacity]="0.7"
+              class="scatter-point"
+            />
+          }
+        </svg>
       </div>
     </section>
 
@@ -175,17 +289,27 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
           </svg>
-          Events Over Time
+          Evenementen per Maand
         </h2>
-        <span class="chart-subtitle">Last 6 months</span>
+        <span class="chart-subtitle">Tijdlijn met aantal events en scores</span>
       </div>
       <div class="timeline-chart">
         @for (month of monthlyData(); track month.month) {
-          <div class="timeline-bar">
-            <div class="timeline-fill" [style.height.%]="getBarWidth(month.eventCount, maxMonthlyEvents())">
-              <span class="timeline-value">{{ month.eventCount }}</span>
+          <div class="timeline-item">
+            <div class="timeline-bar">
+              <div class="timeline-fill" [style.height.%]="getBarWidth(month.eventCount, maxMonthlyEvents())">
+                <span class="timeline-value">{{ month.eventCount }}</span>
+              </div>
             </div>
-            <span class="timeline-label">{{ month.shortMonth }}</span>
+            <div class="timeline-info">
+              <span class="timeline-label">{{ month.shortMonth }}</span>
+              <span class="timeline-rating">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                {{ month.avgRating.toFixed(1) }}
+              </span>
+            </div>
           </div>
         }
       </div>

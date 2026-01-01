@@ -28,6 +28,7 @@ interface TopEvent {
   visitors: number;
   rating: number;
   reviews: number;
+  popularityScore: number;
   color: string;
 }
 
@@ -212,7 +213,13 @@ export class Analytics implements OnInit {
   }
 
   calculateTopEvents(events: EventWithRelations[]) {
-    const sorted = [...events].sort((a, b) => (b.visitor_count || 0) - (a.visitor_count || 0));
+    // Calculate popularity score: combine ratings count and visitors
+    const eventsWithScore = events.map(e => ({
+      ...e,
+      popularityScore: (e.review_count || 0) * 2 + (e.visitor_count || 0)
+    }));
+    
+    const sorted = eventsWithScore.sort((a, b) => b.popularityScore - a.popularityScore);
     const top5 = sorted.slice(0, 5).map((e, index) => ({
       id: index + 1,
       title: e.title,
@@ -221,6 +228,7 @@ export class Analytics implements OnInit {
       visitors: e.visitor_count || 0,
       rating: e.avg_rating || 0,
       reviews: e.review_count || 0,
+      popularityScore: e.popularityScore,
       color: e.color
     }));
 
@@ -355,6 +363,51 @@ export class Analytics implements OnInit {
     Math.max(...this.topEvents().map(e => e.visitors))
   );
 
+  protected readonly maxPopularityScore = computed(() => 
+    Math.max(...this.topEvents().map(e => e.popularityScore), 1)
+  );
+
+  // Scatterplot data: visitors vs satisfaction
+  protected readonly scatterData = computed(() => 
+    this.allEvents()
+      .filter(e => (e.visitor_count || 0) > 0 && (e.avg_rating || 0) > 0)
+      .map(e => ({
+        visitors: e.visitor_count || 0,
+        rating: e.avg_rating || 0,
+        title: e.title,
+        category: e.category_id,
+        color: e.color
+      }))
+  );
+
+  protected readonly maxScatterVisitors = computed(() => 
+    Math.max(...this.scatterData().map(d => d.visitors), 1)
+  );
+
+  // Map data: events with coordinates (using city centers as approximation)
+  protected readonly mapEvents = computed(() => {
+    const cityCoordinates: Record<string, {lat: number, lng: number}> = {
+      'Brussels': { lat: 50.8503, lng: 4.3517 },
+      'Antwerp': { lat: 51.2194, lng: 4.4025 },
+      'Ghent': { lat: 51.0543, lng: 3.7174 },
+      'Bruges': { lat: 51.2093, lng: 3.2247 },
+      'Leuven': { lat: 50.8798, lng: 4.7005 },
+      'Liège': { lat: 50.6326, lng: 5.5797 }
+    };
+
+    return this.allEvents()
+      .filter(e => e.city?.name && e.avg_rating)
+      .map(e => {
+        const coords = cityCoordinates[e.city!.name] || { lat: 50.8503, lng: 4.3517 };
+        return {
+          ...e,
+          lat: coords.lat,
+          lng: coords.lng,
+          cityName: e.city!.name
+        };
+      });
+  });
+
   protected readonly totalCategoryEvents = computed(() => 
     this.categoryStats().reduce((sum, c) => sum + c.eventCount, 0)
   );
@@ -377,6 +430,86 @@ export class Analytics implements OnInit {
     const total = this.totalCategoryEvents();
     const percentage = (eventCount / total) * 100;
     return `${percentage} ${100 - percentage}`;
+  }
+
+  getDonutDashArrayByRating(rating: number): string {
+    const percentage = (rating / 5) * 100;
+    return `${percentage} ${100 - percentage}`;
+  }
+
+  getDonutOffsetByRating(index: number): number {
+    const stats = this.categoryStats();
+    let offset = 25;
+    for (let i = 0; i < index; i++) {
+      const percentage = (stats[i].avgRating / 5) * 100;
+      offset -= percentage;
+    }
+    return offset;
+  }
+
+  getOverallAvgRating(): string {
+    const stats = this.categoryStats();
+    if (stats.length === 0) return '0.0';
+    const total = stats.reduce((sum, c) => sum + c.avgRating, 0);
+    return (total / stats.length).toFixed(1);
+  }
+
+  getSortedCityStats() {
+    return [...this.cityStats()].map(city => ({
+      ...city,
+      activityScore: city.eventCount * 10 + city.totalVisitors + (city.avgRating * 100)
+    })).sort((a, b) => b.activityScore - a.activityScore);
+  }
+
+  getMaxActivityScore(): number {
+    const sorted = this.getSortedCityStats();
+    return Math.max(...sorted.map(c => c.activityScore), 1);
+  }
+
+  getMapEventsByCity() {
+    const cityMap = new Map<string, {cityName: string, lat: number, lng: number, avg_rating: number, count: number}>();
+    
+    this.mapEvents().forEach(event => {
+      const key = event.cityName;
+      if (!cityMap.has(key)) {
+        cityMap.set(key, {
+          cityName: event.cityName,
+          lat: event.lat,
+          lng: event.lng,
+          avg_rating: 0,
+          count: 0
+        });
+      }
+      const cityData = cityMap.get(key)!;
+      cityData.avg_rating = (cityData.avg_rating * cityData.count + (event.avg_rating || 0)) / (cityData.count + 1);
+      cityData.count++;
+    });
+    
+    return Array.from(cityMap.values());
+  }
+
+  getMapX(lng: number): number {
+    // Belgium longitude range: ~2.5 to ~6.4
+    // Map width: 300 (50 to 350)
+    return 50 + ((lng - 2.5) / (6.4 - 2.5)) * 300;
+  }
+
+  getMapY(lat: number): number {
+    // Belgium latitude range: ~49.5 to ~51.5
+    // Map height: 200 (50 to 250)
+    return 50 + ((51.5 - lat) / (51.5 - 49.5)) * 200;
+  }
+
+  getMarkerSize(rating: number): number {
+    if (rating < 3) return 8;
+    if (rating < 4) return 10;
+    return 12;
+  }
+
+  getRatingColor(rating: number): string {
+    if (rating < 3) return '#ff4444';
+    if (rating < 4) return '#ffaa00';
+    return '#44ff44';
   }
 
   formatNumber(num: number): string {
