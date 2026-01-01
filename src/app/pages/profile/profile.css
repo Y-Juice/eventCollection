@@ -101,6 +101,30 @@
   line-height: 1.5;
 }
 
+.logout-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.logout-button svg {
+  fill: white;
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;

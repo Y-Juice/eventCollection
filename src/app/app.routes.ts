@@ -4,6 +4,7 @@ import { Explore } from './pages/explore/explore';
 import { Ratings } from './pages/ratings/ratings';
 import { Analytics } from './pages/analytics/analytics';
 import { Profile } from './pages/profile/profile';
+import { Login } from './pages/login/login';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'ratings', component: Ratings },
   { path: 'analytics', component: Analytics },
   { path: 'profile', component: Profile },
+  { path: 'login', component: Login },
   { path: '**', redirectTo: '' }
 ];

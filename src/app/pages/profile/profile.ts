@@ -1,6 +1,8 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { SupabaseService, Category } from '../../services/supabase.service';
+import { UserTrackingService } from '../../services/user-tracking.service';
 
 interface UserProfile {
   name: string;
@@ -36,7 +38,10 @@ interface FavoriteCategory {
 })
 export class Profile implements OnInit {
   private supabase = inject(SupabaseService);
+  private trackingService = inject(UserTrackingService);
+  private router = inject(Router);
   protected readonly loading = signal<boolean>(true);
+  protected readonly isAuthenticated = signal<boolean>(false);
 
   protected readonly user = signal<{
     name: string;
@@ -74,12 +79,44 @@ export class Profile implements OnInit {
   }>>([]);
 
   async ngOnInit() {
+    const currentUser = this.supabase.getCurrentUser();
+    this.isAuthenticated.set(!!currentUser);
+    
+    if (!currentUser) {
+      // Redirect to login if not authenticated
+      this.router.navigate(['/login']);
+      return;
+    }
+
     try {
       await this.loadData();
     } catch (error) {
       console.error('Error loading profile data:', error);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async logout() {
+    try {
+      // Track logout
+      await this.trackingService.trackEvent({
+        event_type: 'logout_clicked',
+        event_category: 'authentication'
+      });
+
+      await this.supabase.signOut();
+      
+      // Track successful logout
+      await this.trackingService.trackEvent({
+        event_type: 'logout_success',
+        event_category: 'authentication'
+      });
+
+      // Redirect to login
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   }
 

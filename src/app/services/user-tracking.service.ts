@@ -64,6 +64,9 @@ export class UserTrackingService {
     // Get or create user ID
     await this.ensureUserId();
     
+    // Listen to auth state changes
+    this.setupAuthListener();
+    
     // Track navigation
     this.trackNavigation();
     
@@ -77,6 +80,73 @@ export class UserTrackingService {
     this.trackUnload();
     
     this.isInitialized = true;
+  }
+
+  private setupAuthListener() {
+    // Listen to auth state changes from Supabase
+    this.supabase.client.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const oldUserId = this.userId();
+        const newUserId = session.user.id;
+        
+        // Update user ID
+        this.userId.set(newUserId);
+        
+        // Track authentication event
+        await this.trackEvent({
+          event_type: 'user_authenticated',
+          event_category: 'authentication',
+          metadata: {
+            previous_user_id: oldUserId,
+            new_user_id: newUserId,
+            migration_occurred: oldUserId && oldUserId.startsWith('anon_')
+          }
+        });
+
+        // If user was anonymous, migrate their events
+        if (oldUserId && oldUserId.startsWith('anon_')) {
+          await this.migrateAnonymousEvents(oldUserId, newUserId);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        // Generate new anonymous UID
+        const newAnonUid = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('anonymous_user_id', newAnonUid);
+        this.userId.set(newAnonUid);
+        
+        // Track sign out
+        await this.trackEvent({
+          event_type: 'user_signed_out',
+          event_category: 'authentication'
+        });
+      }
+    });
+  }
+
+  private async migrateAnonymousEvents(oldUserId: string, newUserId: string): Promise<void> {
+    try {
+      // Update all events in the queue with new user ID
+      this.eventQueue.forEach(event => {
+        if (event.user_id === oldUserId) {
+          event.user_id = newUserId;
+        }
+      });
+
+      // Also update events in database (if any were already saved)
+      // This would require a database migration function
+      // For now, we'll just update the queue
+      
+      await this.trackEvent({
+        event_type: 'events_migrated',
+        event_category: 'system',
+        metadata: {
+          from_user_id: oldUserId,
+          to_user_id: newUserId,
+          events_migrated: this.eventQueue.length
+        }
+      });
+    } catch (error) {
+      console.warn('Error migrating anonymous events:', error);
+    }
   }
 
   private generateSessionId(): string {
@@ -332,6 +402,27 @@ export class UserTrackingService {
 
   getSessionId(): string {
     return this.sessionId;
+  }
+
+  // Update user ID (called after login/signup)
+  async updateUserId(): Promise<void> {
+    const authUser = this.supabase.getCurrentUser();
+    if (authUser?.id) {
+      const oldUserId = this.userId();
+      const newUserId = authUser.id;
+      
+      if (oldUserId !== newUserId) {
+        // If user was anonymous, migrate events
+        if (oldUserId && oldUserId.startsWith('anon_')) {
+          await this.migrateAnonymousEvents(oldUserId, newUserId);
+        }
+        
+        this.userId.set(newUserId);
+      }
+    } else {
+      // Fall back to anonymous if no auth user
+      await this.ensureUserId();
+    }
   }
 
   // Manual flush for testing or critical events
