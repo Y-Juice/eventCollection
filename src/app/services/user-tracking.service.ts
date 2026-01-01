@@ -231,15 +231,15 @@ export class UserTrackingService {
       page_url: eventData.page_url || window.location.href,
       page_title: eventData.page_title || document.title,
       route_path: eventData.route_path || this.router.url,
-      x_coordinate: eventData.x_coordinate,
-      y_coordinate: eventData.y_coordinate,
-      viewport_width: eventData.viewport_width || window.innerWidth,
-      viewport_height: eventData.viewport_height || window.innerHeight,
-      scroll_position: eventData.scroll_position || window.scrollY,
+      x_coordinate: eventData.x_coordinate ? Math.round(eventData.x_coordinate) : undefined,
+      y_coordinate: eventData.y_coordinate ? Math.round(eventData.y_coordinate) : undefined,
+      viewport_width: eventData.viewport_width ? Math.round(eventData.viewport_width) : Math.round(window.innerWidth),
+      viewport_height: eventData.viewport_height ? Math.round(eventData.viewport_height) : Math.round(window.innerHeight),
+      scroll_position: eventData.scroll_position ? Math.round(eventData.scroll_position) : Math.round(window.scrollY),
       timestamp: new Date().toISOString(),
       session_id: this.sessionId,
       metadata: eventData.metadata || {},
-      duration_ms: eventData.duration_ms,
+      duration_ms: eventData.duration_ms ? Math.round(eventData.duration_ms) : undefined,
       file_metadata: eventData.file_metadata
     };
 
@@ -259,8 +259,8 @@ export class UserTrackingService {
       element_id: element.id || undefined,
       element_class: element.className || undefined,
       element_text: this.getElementText(element),
-      x_coordinate: event.clientX,
-      y_coordinate: event.clientY
+      x_coordinate: Math.round(event.clientX),
+      y_coordinate: Math.round(event.clientY)
     });
   }
 
@@ -272,9 +272,9 @@ export class UserTrackingService {
       element_id: element.id || undefined,
       element_class: element.className || undefined,
       element_text: this.getElementText(element),
-      x_coordinate: event.clientX,
-      y_coordinate: event.clientY,
-      duration_ms: duration
+      x_coordinate: Math.round(event.clientX),
+      y_coordinate: Math.round(event.clientY),
+      duration_ms: duration ? Math.round(duration) : undefined
     });
   }
 
@@ -282,7 +282,7 @@ export class UserTrackingService {
     await this.trackEvent({
       event_type: 'scroll',
       event_category: 'interaction',
-      scroll_position: window.scrollY
+      scroll_position: Math.round(window.scrollY)
     });
   }
 
