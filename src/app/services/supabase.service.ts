@@ -530,6 +530,123 @@ export class SupabaseService {
     if (error) throw error;
     return data;
   }
+
+  // ============================================
+  // User Event Tracking
+  // ============================================
+
+  async saveUserEvents(events: any[]): Promise<void> {
+    if (events.length === 0) return;
+
+    const { error } = await this.supabase
+      .from('user_events')
+      .insert(events);
+
+    if (error) throw error;
+  }
+
+  async getUserEvents(userId?: string, filters?: {
+    eventType?: string;
+    eventCategory?: string;
+    startDate?: string;
+    endDate?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    const user = userId || this.getCurrentUser()?.id;
+    if (!user) return [];
+
+    let query = this.supabase
+      .from('user_events')
+      .select('*')
+      .eq('user_id', user)
+      .order('timestamp', { ascending: false });
+
+    if (filters?.eventType) {
+      query = query.eq('event_type', filters.eventType);
+    }
+
+    if (filters?.eventCategory) {
+      query = query.eq('event_category', filters.eventCategory);
+    }
+
+    if (filters?.startDate) {
+      query = query.gte('timestamp', filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      query = query.lte('timestamp', filters.endDate);
+    }
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getUserEventStats(userId?: string): Promise<{
+    totalEvents: number;
+    eventsByType: Record<string, number>;
+    eventsByCategory: Record<string, number>;
+    firstEventDate: string | null;
+    lastEventDate: string | null;
+    totalSessions: number;
+  }> {
+    const user = userId || this.getCurrentUser()?.id;
+    if (!user) {
+      return {
+        totalEvents: 0,
+        eventsByType: {},
+        eventsByCategory: {},
+        firstEventDate: null,
+        lastEventDate: null,
+        totalSessions: 0
+      };
+    }
+
+    const events = await this.getUserEvents(userId);
+
+    const eventsByType: Record<string, number> = {};
+    const eventsByCategory: Record<string, number> = {};
+    const sessions = new Set<string>();
+
+    let firstEventDate: string | null = null;
+    let lastEventDate: string | null = null;
+
+    events.forEach(event => {
+      // Count by type
+      eventsByType[event.event_type] = (eventsByType[event.event_type] || 0) + 1;
+      
+      // Count by category
+      eventsByCategory[event.event_category] = (eventsByCategory[event.event_category] || 0) + 1;
+      
+      // Track sessions
+      if (event.session_id) {
+        sessions.add(event.session_id);
+      }
+
+      // Track dates
+      if (event.timestamp) {
+        if (!firstEventDate || event.timestamp < firstEventDate) {
+          firstEventDate = event.timestamp;
+        }
+        if (!lastEventDate || event.timestamp > lastEventDate) {
+          lastEventDate = event.timestamp;
+        }
+      }
+    });
+
+    return {
+      totalEvents: events.length,
+      eventsByType,
+      eventsByCategory,
+      firstEventDate,
+      lastEventDate,
+      totalSessions: sessions.size
+    };
+  }
 }
 
 

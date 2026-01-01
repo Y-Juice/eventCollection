@@ -154,7 +154,7 @@
       } @else {
         @for (rating of ratingHistory(); track rating.id) {
           <article class="rating-card">
-            <div class="event-color-bar" [style.background]="rating.event.color"></div>
+            <div class="event-color-bar" [style.background]="rating.event?.color || '#000000'"></div>
             <div class="rating-content">
               <div class="rating-header">
                 <div class="event-category-icon small" [style.background]="getCategoryColor(rating.event?.category_id || '')">
@@ -195,8 +195,8 @@
                     </svg>
                   }
                 </div>
-                <span class="rating-date">{{ formatDateTime(rating.createdAt) }}</span>
-                @if (rating.wasPresent) {
+                <span class="rating-date">{{ formatDateTime(rating.created_at) }}</span>
+                @if (rating.was_present) {
                   <span class="present-badge">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>

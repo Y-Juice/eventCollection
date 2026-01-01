@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupabaseService, EventWithRelations, City, Category } from '../../services/supabase.service';
+import { UserTrackingService } from '../../services/user-tracking.service';
 
 @Component({
   selector: 'app-home',
@@ -10,6 +11,7 @@ import { SupabaseService, EventWithRelations, City, Category } from '../../servi
 })
 export class Home implements OnInit {
   private supabase = inject(SupabaseService);
+  private trackingService = inject(UserTrackingService);
   protected readonly cities = signal<City[]>([]);
   protected readonly selectedCity = signal<string>('Brussels');
   protected readonly categories = signal<Category[]>([]);
@@ -19,6 +21,14 @@ export class Home implements OnInit {
 
   async ngOnInit() {
     try {
+      // Track page view
+      await this.trackingService.trackEvent({
+        event_type: 'page_view',
+        event_category: 'navigation',
+        route_path: '/',
+        metadata: { page: 'home' }
+      });
+
       // Load cities
       const citiesData = await this.supabase.getCities();
       this.cities.set(citiesData);
@@ -52,14 +62,58 @@ export class Home implements OnInit {
     }
   }
 
-  selectCity(cityName: string): void {
+  async selectCity(cityName: string): Promise<void> {
     this.selectedCity.set(cityName);
-    this.loadEvents();
+    
+    // Track filter change
+    await this.trackingService.trackEvent({
+      event_type: 'filter_change',
+      event_category: 'interaction',
+      element_type: 'filter',
+      element_id: 'city_filter',
+      metadata: {
+        filter_type: 'city',
+        filter_value: cityName,
+        previous_value: this.selectedCity()
+      }
+    });
+    
+    await this.loadEvents();
   }
 
-  selectCategory(categoryId: string): void {
+  async selectCategory(categoryId: string): Promise<void> {
     this.selectedCategory.set(categoryId);
-    this.loadEvents();
+    
+    // Track filter change
+    await this.trackingService.trackEvent({
+      event_type: 'filter_change',
+      event_category: 'interaction',
+      element_type: 'filter',
+      element_id: 'category_filter',
+      metadata: {
+        filter_type: 'category',
+        filter_value: categoryId,
+        previous_value: this.selectedCategory()
+      }
+    });
+    
+    await this.loadEvents();
+  }
+
+  async trackEventClick(event: EventWithRelations): Promise<void> {
+    await this.trackingService.trackEvent({
+      event_type: 'event_click',
+      event_category: 'content',
+      element_type: 'event_card',
+      element_id: event.id,
+      metadata: {
+        event_id: event.id,
+        event_title: event.title,
+        event_category: event.category?.name,
+        event_city: event.city?.name,
+        event_date: event.event_date
+      }
+    });
   }
 
   // Helper methods to get category/city names for template compatibility
