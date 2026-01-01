@@ -678,8 +678,8 @@
   color: #666;
 }
 
-.legend-marker circle {
-  fill: currentColor;
+.legend-marker svg {
+  flex-shrink: 0;
 }
 
 /* Scatterplot */

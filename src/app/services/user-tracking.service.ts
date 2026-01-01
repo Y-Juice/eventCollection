@@ -231,11 +231,11 @@ export class UserTrackingService {
       page_url: eventData.page_url || window.location.href,
       page_title: eventData.page_title || document.title,
       route_path: eventData.route_path || this.router.url,
-      x_coordinate: eventData.x_coordinate ? Math.round(eventData.x_coordinate) : undefined,
-      y_coordinate: eventData.y_coordinate ? Math.round(eventData.y_coordinate) : undefined,
-      viewport_width: eventData.viewport_width ? Math.round(eventData.viewport_width) : Math.round(window.innerWidth),
-      viewport_height: eventData.viewport_height ? Math.round(eventData.viewport_height) : Math.round(window.innerHeight),
-      scroll_position: eventData.scroll_position ? Math.round(eventData.scroll_position) : Math.round(window.scrollY),
+      x_coordinate: eventData.x_coordinate !== undefined && eventData.x_coordinate !== null ? Math.round(eventData.x_coordinate) : undefined,
+      y_coordinate: eventData.y_coordinate !== undefined && eventData.y_coordinate !== null ? Math.round(eventData.y_coordinate) : undefined,
+      viewport_width: eventData.viewport_width !== undefined && eventData.viewport_width !== null ? Math.round(eventData.viewport_width) : Math.round(window.innerWidth),
+      viewport_height: eventData.viewport_height !== undefined && eventData.viewport_height !== null ? Math.round(eventData.viewport_height) : Math.round(window.innerHeight),
+      scroll_position: eventData.scroll_position !== undefined && eventData.scroll_position !== null ? Math.round(eventData.scroll_position) : Math.round(window.scrollY),
       timestamp: new Date().toISOString(),
       session_id: this.sessionId,
       metadata: eventData.metadata || {},
@@ -385,8 +385,35 @@ export class UserTrackingService {
 
     const eventsToFlush = force ? [...this.eventQueue] : this.eventQueue.splice(0, this.batchSize);
 
+    // Sanitize events: ensure all integer fields are properly rounded
+    const sanitizedEvents = eventsToFlush.map(event => {
+      const sanitized: any = { ...event };
+      
+      // Round all integer fields if they exist
+      if (sanitized.x_coordinate !== undefined && sanitized.x_coordinate !== null) {
+        sanitized.x_coordinate = Math.round(sanitized.x_coordinate);
+      }
+      if (sanitized.y_coordinate !== undefined && sanitized.y_coordinate !== null) {
+        sanitized.y_coordinate = Math.round(sanitized.y_coordinate);
+      }
+      if (sanitized.viewport_width !== undefined && sanitized.viewport_width !== null) {
+        sanitized.viewport_width = Math.round(sanitized.viewport_width);
+      }
+      if (sanitized.viewport_height !== undefined && sanitized.viewport_height !== null) {
+        sanitized.viewport_height = Math.round(sanitized.viewport_height);
+      }
+      if (sanitized.scroll_position !== undefined && sanitized.scroll_position !== null) {
+        sanitized.scroll_position = Math.round(sanitized.scroll_position);
+      }
+      if (sanitized.duration_ms !== undefined && sanitized.duration_ms !== null) {
+        sanitized.duration_ms = Math.round(sanitized.duration_ms);
+      }
+      
+      return sanitized;
+    });
+
     try {
-      await this.supabase.saveUserEvents(eventsToFlush);
+      await this.supabase.saveUserEvents(sanitizedEvents);
     } catch (error) {
       console.error('Error flushing events:', error);
       // Re-queue events if flush failed (unless forced)

@@ -451,8 +451,18 @@ export class SupabaseService {
     const user = userId || this.getCurrentUser()?.id;
     if (!user) return [];
 
-    // Get events user has checked into but not rated
-    const { data, error } = await this.supabase
+    // First, get all event IDs that the user has already rated
+    const { data: ratedEvents, error: ratedError } = await this.supabase
+      .from('ratings')
+      .select('event_id')
+      .eq('user_id', user);
+
+    if (ratedError) throw ratedError;
+
+    const ratedEventIds = (ratedEvents || []).map((r: any) => r.event_id);
+
+    // Get all visits for the user
+    const { data: visits, error } = await this.supabase
       .from('visits')
       .select(`
         event:events(
@@ -461,16 +471,17 @@ export class SupabaseService {
           city:cities(*)
         )
       `)
-      .eq('user_id', user)
-      .not('event_id', 'in', 
-        this.supabase
-          .from('ratings')
-          .select('event_id')
-          .eq('user_id', user)
-      );
+      .eq('user_id', user);
 
     if (error) throw error;
-    return (data || []).map((v: any) => v.event).filter(Boolean);
+
+    // Filter out events that have been rated
+    const pendingVisits = (visits || []).filter((v: any) => {
+      const eventId = v.event?.id || v.event_id;
+      return eventId && !ratedEventIds.includes(eventId);
+    });
+
+    return pendingVisits.map((v: any) => v.event).filter(Boolean);
   }
 
   async deleteRating(ratingId: string): Promise<void> {
