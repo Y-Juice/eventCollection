@@ -53,6 +53,212 @@
     </div>
   </div>
 
+  <!-- Trend Signals Section -->
+  @if (trendSignals().length > 0) {
+    <section class="signals-section">
+      <div class="signals-header">
+        <h2 class="signals-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+          </svg>
+          Trend Signals
+        </h2>
+        <span class="signals-subtitle">Real-time insights based on recent vs historical data</span>
+      </div>
+      <div class="signals-grid">
+        @for (signal of trendSignals(); track signal.title) {
+          <div class="signal-card" [class.positive]="signal.type === 'positive'" [class.negative]="signal.type === 'negative'">
+            <div class="signal-icon">
+              @if (signal.icon === 'trending_up') {
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                </svg>
+              }
+              @if (signal.icon === 'trending_down') {
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6z"/>
+                </svg>
+              }
+              @if (signal.icon === 'warning') {
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+              }
+              @if (signal.icon === 'star') {
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+              }
+            </div>
+            <div class="signal-content">
+              <span class="signal-title">{{ signal.title }}</span>
+              <span class="signal-desc">{{ signal.description }}</span>
+              <div class="signal-stats">
+                <span class="signal-metric">{{ signal.metric }}</span>
+                <span class="signal-change" [class.up]="signal.change > 0" [class.down]="signal.change < 0">
+                  {{ signal.change > 0 ? '+' : '' }}{{ signal.change }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Category Momentum Section -->
+  @if (categoryTrends().length > 0) {
+    <section class="momentum-section">
+      <div class="momentum-header">
+        <h2 class="momentum-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+          </svg>
+          Category Momentum
+        </h2>
+        <span class="momentum-subtitle">Recent performance vs 3 months ago</span>
+      </div>
+      <div class="momentum-grid">
+        @for (trend of categoryTrends(); track trend.name) {
+          <div class="momentum-card">
+            <div class="momentum-badge" [class.rising]="trend.momentum === 'rising'" [class.falling]="trend.momentum === 'falling'">
+              @if (trend.momentum === 'rising') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 14l5-5 5 5z"/>
+                </svg>
+              }
+              @if (trend.momentum === 'falling') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 10l5 5 5-5z"/>
+                </svg>
+              }
+              @if (trend.momentum === 'stable') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 12h8v2H8z"/>
+                </svg>
+              }
+            </div>
+            <div class="momentum-info">
+              <span class="momentum-name" [style.color]="trend.color">{{ trend.name }}</span>
+              <div class="momentum-stats">
+                <span class="momentum-events">{{ trend.recentEvents }} recent events</span>
+                <span class="momentum-rating">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  {{ trend.recentAvgRating }}
+                </span>
+              </div>
+            </div>
+            <div class="momentum-changes">
+              <div class="momentum-change-item">
+                <span class="change-label">Growth</span>
+                <span class="change-value" [class.positive]="trend.growthRate > 0" [class.negative]="trend.growthRate < 0">
+                  {{ trend.growthRate > 0 ? '+' : '' }}{{ trend.growthRate }}%
+                </span>
+              </div>
+              <div class="momentum-change-item">
+                <span class="change-label">Rating</span>
+                <span class="change-value" [class.positive]="trend.ratingChange > 0" [class.negative]="trend.ratingChange < 0">
+                  {{ trend.ratingChange > 0 ? '+' : '' }}{{ trend.ratingChange }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Seasonal Patterns Section -->
+  @if (seasonalPatterns().length > 0) {
+    <section class="seasonal-section">
+      <div class="seasonal-header">
+        <h2 class="seasonal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+          </svg>
+          Seasonal Patterns
+        </h2>
+        <span class="seasonal-subtitle">Best performing categories by season</span>
+      </div>
+      <div class="seasonal-grid">
+        @for (pattern of seasonalPatterns(); track pattern.season) {
+          <div class="seasonal-card" [class.winter]="pattern.season === 'Winter'" [class.spring]="pattern.season === 'Spring'" [class.summer]="pattern.season === 'Summer'" [class.fall]="pattern.season === 'Fall'">
+            <div class="seasonal-icon">
+              @if (pattern.season === 'Winter') {
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/>
+                </svg>
+              }
+              @if (pattern.season === 'Spring') {
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zM5.6 10.25c0 1.38 1.12 2.5 2.5 2.5.53 0 1.01-.16 1.42-.44l-.02.19c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5l-.02-.19c.4.28.89.44 1.42.44 1.38 0 2.5-1.12 2.5-2.5 0-1-.59-1.85-1.43-2.25.84-.4 1.43-1.25 1.43-2.25 0-1.38-1.12-2.5-2.5-2.5-.53 0-1.01.16-1.42.44l.02-.19C14.5 4.12 13.38 3 12 3S9.5 4.12 9.5 5.5l.02.19c-.4-.28-.89-.44-1.42-.44-1.38 0-2.5 1.12-2.5 2.5 0 1 .59 1.85 1.43 2.25-.84.4-1.43 1.25-1.43 2.25zM12 5.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5S9.5 9.38 9.5 8s1.12-2.5 2.5-2.5zM3 13c0 4.97 4.03 9 9 9 0-4.97-4.03-9-9-9z"/>
+                </svg>
+              }
+              @if (pattern.season === 'Summer') {
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/>
+                </svg>
+              }
+              @if (pattern.season === 'Fall') {
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
+                </svg>
+              }
+            </div>
+            <span class="seasonal-name">{{ pattern.season }}</span>
+            <div class="seasonal-stats">
+              <span class="seasonal-events">{{ pattern.eventCount }} events</span>
+              <span class="seasonal-rating">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                {{ pattern.avgRating }}
+              </span>
+            </div>
+            <div class="seasonal-best">
+              <span class="best-label">Best category:</span>
+              <span class="best-category" [style.color]="pattern.bestCategoryColor">{{ pattern.bestCategory }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Best & Worst Months Insight -->
+  @if (bestMonth().month && worstMonth().month) {
+    <section class="insights-section">
+      <div class="insight-cards">
+        <div class="insight-card best">
+          <div class="insight-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </div>
+          <div class="insight-content">
+            <span class="insight-label">Best Month</span>
+            <span class="insight-value">{{ bestMonth().month }}</span>
+            <span class="insight-reason">{{ bestMonth().reason }}</span>
+          </div>
+        </div>
+        <div class="insight-card worst">
+          <div class="insight-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+          </div>
+          <div class="insight-content">
+            <span class="insight-label">Needs Attention</span>
+            <span class="insight-value">{{ worstMonth().month }}</span>
+            <span class="insight-reason">{{ worstMonth().reason }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
   <!-- Charts Section -->
   <div class="charts-grid">
     <!-- Top 5 Popular Events - Bar Chart -->

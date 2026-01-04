@@ -22,6 +22,507 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* ========================================
+   TREND SIGNALS SECTION
+   ======================================== */
+.signals-section {
+  padding: 0 20px 20px;
+}
+
+.signals-header {
+  margin-bottom: 16px;
+}
+
+.signals-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 4px;
+}
+
+.signals-title svg {
+  fill: #7B68C8;
+}
+
+.signals-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.signals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.signal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #888;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.signal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.signal-card.positive {
+  border-left-color: #4CAF50;
+}
+
+.signal-card.negative {
+  border-left-color: #F44336;
+}
+
+.signal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #F5F0E8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.signal-card.positive .signal-icon {
+  background: #E8F5E9;
+}
+
+.signal-card.positive .signal-icon svg {
+  fill: #4CAF50;
+}
+
+.signal-card.negative .signal-icon {
+  background: #FFEBEE;
+}
+
+.signal-card.negative .signal-icon svg {
+  fill: #F44336;
+}
+
+.signal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A1A2E;
+}
+
+.signal-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.signal-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.signal-metric {
+  font-size: 12px;
+  color: #888;
+  background: #F5F0E8;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.signal-change {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.signal-change.up {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
+
+.signal-change.down {
+  background: #FFEBEE;
+  color: #F44336;
+}
+
+/* ========================================
+   CATEGORY MOMENTUM SECTION
+   ======================================== */
+.momentum-section {
+  padding: 0 20px 20px;
+}
+
+.momentum-header {
+  margin-bottom: 16px;
+}
+
+.momentum-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 4px;
+}
+
+.momentum-title svg {
+  fill: #FF6B5B;
+}
+
+.momentum-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.momentum-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.momentum-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.momentum-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #F5F0E8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.momentum-badge svg {
+  fill: #888;
+}
+
+.momentum-badge.rising {
+  background: #E8F5E9;
+}
+
+.momentum-badge.rising svg {
+  fill: #4CAF50;
+}
+
+.momentum-badge.falling {
+  background: #FFEBEE;
+}
+
+.momentum-badge.falling svg {
+  fill: #F44336;
+}
+
+.momentum-info {
+  flex: 1;
+}
+
+.momentum-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.momentum-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.momentum-events {
+  font-size: 12px;
+  color: #666;
+}
+
+.momentum-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.momentum-rating svg {
+  fill: #FFB800;
+}
+
+.momentum-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.momentum-change-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.change-label {
+  font-size: 11px;
+  color: #888;
+}
+
+.change-value {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 50px;
+  text-align: right;
+  color: #888;
+}
+
+.change-value.positive {
+  color: #4CAF50;
+}
+
+.change-value.negative {
+  color: #F44336;
+}
+
+/* ========================================
+   SEASONAL PATTERNS SECTION
+   ======================================== */
+.seasonal-section {
+  padding: 0 20px 20px;
+}
+
+.seasonal-header {
+  margin-bottom: 16px;
+}
+
+.seasonal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 4px;
+}
+
+.seasonal-title svg {
+  fill: #7B68C8;
+}
+
+.seasonal-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.seasonal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.seasonal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+}
+
+.seasonal-card:hover {
+  transform: translateY(-2px);
+}
+
+.seasonal-card.winter {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+}
+
+.seasonal-card.winter .seasonal-icon svg {
+  fill: #2196F3;
+}
+
+.seasonal-card.spring {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+}
+
+.seasonal-card.spring .seasonal-icon svg {
+  fill: #4CAF50;
+}
+
+.seasonal-card.summer {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFCC80 100%);
+}
+
+.seasonal-card.summer .seasonal-icon svg {
+  fill: #FF9800;
+}
+
+.seasonal-card.fall {
+  background: linear-gradient(135deg, #FBE9E7 0%, #FFCCBC 100%);
+}
+
+.seasonal-card.fall .seasonal-icon svg {
+  fill: #FF5722;
+}
+
+.seasonal-icon {
+  margin-bottom: 8px;
+}
+
+.seasonal-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 8px;
+}
+
+.seasonal-stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.seasonal-events {
+  font-size: 12px;
+  color: #666;
+}
+
+.seasonal-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.seasonal-rating svg {
+  fill: #FFB800;
+}
+
+.seasonal-best {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.best-label {
+  font-size: 11px;
+  color: #888;
+}
+
+.best-category {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ========================================
+   INSIGHTS SECTION
+   ======================================== */
+.insights-section {
+  padding: 0 20px 20px;
+}
+
+.insight-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.insight-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.insight-card.best {
+  border-top: 4px solid #4CAF50;
+}
+
+.insight-card.worst {
+  border-top: 4px solid #FF9800;
+}
+
+.insight-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.insight-card.best .insight-icon {
+  background: #E8F5E9;
+}
+
+.insight-card.best .insight-icon svg {
+  fill: #4CAF50;
+}
+
+.insight-card.worst .insight-icon {
+  background: #FFF3E0;
+}
+
+.insight-card.worst .insight-icon svg {
+  fill: #FF9800;
+}
+
+.insight-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.insight-label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.insight-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1A2E;
+}
+
+.insight-reason {
+  font-size: 12px;
+  color: #666;
+}
+
 /* Overview Grid */
 .overview-grid {
   display: grid;
@@ -732,6 +1233,38 @@
     gap: 16px;
   }
 
+  /* Trend Signals */
+  .signals-section {
+    padding: 0 40px 24px;
+  }
+
+  .signals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Category Momentum */
+  .momentum-section {
+    padding: 0 40px 24px;
+  }
+
+  .momentum-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Seasonal Patterns */
+  .seasonal-section {
+    padding: 0 40px 24px;
+  }
+
+  .seasonal-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Insights */
+  .insights-section {
+    padding: 0 40px 24px;
+  }
+
   .charts-grid {
     grid-template-columns: repeat(2, 1fr);
     padding: 0 40px 24px;
@@ -777,6 +1310,54 @@
     font-size: 26px;
   }
 
+  /* Trend Signals */
+  .signals-section {
+    padding: 0 80px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .signals-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .signal-card {
+    padding: 20px;
+  }
+
+  /* Category Momentum */
+  .momentum-section {
+    padding: 0 80px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .momentum-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Seasonal Patterns */
+  .seasonal-section {
+    padding: 0 80px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .seasonal-card {
+    padding: 20px;
+  }
+
+  /* Insights */
+  .insights-section {
+    padding: 0 80px 32px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .insight-card {
+    padding: 20px;
+  }
+
   .charts-grid {
     padding: 0 80px 32px;
     max-width: 1200px;
@@ -809,6 +1390,30 @@
 
   .overview-grid {
     padding: 32px 120px;
+  }
+
+  /* Trend Signals */
+  .signals-section {
+    padding: 0 120px 40px;
+    max-width: 1400px;
+  }
+
+  /* Category Momentum */
+  .momentum-section {
+    padding: 0 120px 40px;
+    max-width: 1400px;
+  }
+
+  /* Seasonal Patterns */
+  .seasonal-section {
+    padding: 0 120px 40px;
+    max-width: 1400px;
+  }
+
+  /* Insights */
+  .insights-section {
+    padding: 0 120px 40px;
+    max-width: 700px;
   }
 
   .charts-grid {
@@ -851,6 +1456,90 @@
 
   .overview-value {
     font-size: 18px;
+  }
+
+  /* Trend Signals */
+  .signals-section {
+    padding: 0 16px 16px;
+  }
+
+  .signals-title {
+    font-size: 18px;
+  }
+
+  .signal-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .signal-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .signal-title {
+    font-size: 14px;
+  }
+
+  .signal-desc {
+    font-size: 12px;
+  }
+
+  /* Category Momentum */
+  .momentum-section {
+    padding: 0 16px 16px;
+  }
+
+  .momentum-title {
+    font-size: 18px;
+  }
+
+  .momentum-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .momentum-badge {
+    width: 30px;
+    height: 30px;
+  }
+
+  .momentum-name {
+    font-size: 13px;
+  }
+
+  /* Seasonal Patterns */
+  .seasonal-section {
+    padding: 0 16px 16px;
+  }
+
+  .seasonal-title {
+    font-size: 18px;
+  }
+
+  .seasonal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .seasonal-card {
+    padding: 14px;
+  }
+
+  /* Insights */
+  .insights-section {
+    padding: 0 16px 16px;
+  }
+
+  .insight-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .insight-card {
+    padding: 14px;
+  }
+
+  .insight-value {
+    font-size: 16px;
   }
 
   .charts-grid {
