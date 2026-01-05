@@ -97,6 +97,11 @@ This document tracks all sources, AI conversations, references, and development 
 
 ## External Resources
 
+### AI Conversations
+1. **ChatGPT Development Session**
+   - URL: https://chatgpt.com/share/695b269e-ab1c-8008-9e84-aaa8e46e0c54
+   - Used for: Development assistance and code generation
+
 ### Documentation References
 1. **Angular Signals Guide**
    - URL: https://angular.io/guide/signals
