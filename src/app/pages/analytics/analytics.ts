@@ -1,8 +1,6 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupabaseService, EventWithRelations, Category, City } from '../../services/supabase.service';
-import { ApiService } from '../../services/api.service';
-import { environment } from '../../../environments/environment';
 
 interface CategoryStats {
   id: string;
@@ -50,35 +48,6 @@ interface QualityEvent {
   color: string;
 }
 
-interface TrendSignal {
-  type: 'positive' | 'negative' | 'neutral';
-  title: string;
-  description: string;
-  metric: string;
-  change: number;
-  icon: 'trending_up' | 'trending_down' | 'warning' | 'star' | 'calendar' | 'location';
-}
-
-interface CategoryTrend {
-  name: string;
-  color: string;
-  recentAvgRating: number;
-  olderAvgRating: number;
-  ratingChange: number;
-  recentEvents: number;
-  olderEvents: number;
-  growthRate: number;
-  momentum: 'rising' | 'falling' | 'stable';
-}
-
-interface SeasonalPattern {
-  season: string;
-  eventCount: number;
-  avgRating: number;
-  bestCategory: string;
-  bestCategoryColor: string;
-}
-
 @Component({
   selector: 'app-analytics',
   imports: [CommonModule],
@@ -87,8 +56,6 @@ interface SeasonalPattern {
 })
 export class Analytics implements OnInit {
   private supabase = inject(SupabaseService);
-  private apiService = inject(ApiService);
-  private useLocalApi = environment.useLocalApi || false;
   protected readonly loading = signal<boolean>(true);
   
   // Overall stats
@@ -126,21 +93,6 @@ export class Analytics implements OnInit {
   // Time analysis
   protected readonly timeAnalysis = signal<Array<{day: string, avgRating: number, eventCount: number}>>([]);
 
-  // Trend signals
-  protected readonly trendSignals = signal<TrendSignal[]>([]);
-
-  // Category trends (comparing recent vs older events)
-  protected readonly categoryTrends = signal<CategoryTrend[]>([]);
-
-  // Seasonal patterns
-  protected readonly seasonalPatterns = signal<SeasonalPattern[]>([]);
-
-  // Best performing month
-  protected readonly bestMonth = signal<{month: string, reason: string}>({month: '', reason: ''});
-
-  // Worst performing month
-  protected readonly worstMonth = signal<{month: string, reason: string}>({month: '', reason: ''});
-
   async ngOnInit() {
     try {
       await this.loadData();
@@ -153,22 +105,16 @@ export class Analytics implements OnInit {
 
   async loadData() {
     // Load all events
-    const events = this.useLocalApi
-      ? await this.apiService.getEvents()
-      : await this.supabase.getEvents();
-    this.allEvents.set(events as EventWithRelations[]);
+    const events = await this.supabase.getEvents();
+    this.allEvents.set(events);
 
     // Load categories
-    const categoriesData = this.useLocalApi
-      ? await this.apiService.getCategories()
-      : await this.supabase.getCategories();
-    this.categories.set(categoriesData as Category[]);
+    const categoriesData = await this.supabase.getCategories();
+    this.categories.set(categoriesData);
 
     // Load cities
-    const citiesData = this.useLocalApi
-      ? await this.apiService.getCities()
-      : await this.supabase.getCities();
-    this.cities.set(citiesData as City[]);
+    const citiesData = await this.supabase.getCities();
+    this.cities.set(citiesData);
 
     // Calculate overall stats
     this.calculateOverallStats(events);
@@ -193,18 +139,6 @@ export class Analytics implements OnInit {
 
     // Calculate time analysis
     this.calculateTimeAnalysis(events);
-
-    // Calculate trend signals
-    this.calculateTrendSignals(events, categoriesData);
-
-    // Calculate category trends
-    this.calculateCategoryTrends(events, categoriesData);
-
-    // Calculate seasonal patterns
-    this.calculateSeasonalPatterns(events, categoriesData);
-
-    // Calculate best/worst months
-    this.calculateBestWorstMonths(events);
   }
 
   calculateOverallStats(events: EventWithRelations[]) {
@@ -414,279 +348,6 @@ export class Analytics implements OnInit {
     });
 
     this.timeAnalysis.set(timeAnalysis);
-  }
-
-  calculateTrendSignals(events: EventWithRelations[], categories: Category[]) {
-    const signals: TrendSignal[] = [];
-    const now = new Date();
-    const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-
-    // Split events into recent (last 3 months) and older (3-6 months ago)
-    const recentEvents = events.filter(e => new Date(e.event_date) >= threeMonthsAgo);
-    const olderEvents = events.filter(e => {
-      const date = new Date(e.event_date);
-      return date < threeMonthsAgo && date >= sixMonthsAgo;
-    });
-
-    // 1. Overall rating trend
-    const recentAvgRating = recentEvents.length > 0
-      ? recentEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / recentEvents.length
-      : 0;
-    const olderAvgRating = olderEvents.length > 0
-      ? olderEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / olderEvents.length
-      : 0;
-    
-    if (olderAvgRating > 0) {
-      const ratingChange = ((recentAvgRating - olderAvgRating) / olderAvgRating) * 100;
-      if (Math.abs(ratingChange) > 5) {
-        signals.push({
-          type: ratingChange > 0 ? 'positive' : 'negative',
-          title: ratingChange > 0 ? 'Rating Improving' : 'Rating Declining',
-          description: ratingChange > 0 
-            ? 'Average event ratings are trending upward' 
-            : 'Average event ratings are declining - quality may need attention',
-          metric: `${recentAvgRating.toFixed(1)} vs ${olderAvgRating.toFixed(1)}`,
-          change: parseFloat(ratingChange.toFixed(1)),
-          icon: ratingChange > 0 ? 'trending_up' : 'trending_down'
-        });
-      }
-    }
-
-    // 2. Visitor growth trend
-    const recentVisitors = recentEvents.reduce((sum, e) => sum + (e.visitor_count || 0), 0);
-    const olderVisitors = olderEvents.reduce((sum, e) => sum + (e.visitor_count || 0), 0);
-    
-    if (olderVisitors > 0) {
-      const visitorChange = ((recentVisitors - olderVisitors) / olderVisitors) * 100;
-      if (Math.abs(visitorChange) > 10) {
-        signals.push({
-          type: visitorChange > 0 ? 'positive' : 'negative',
-          title: visitorChange > 0 ? 'Visitor Growth' : 'Visitor Decline',
-          description: visitorChange > 0 
-            ? 'More visitors are attending events recently' 
-            : 'Fewer visitors are attending recent events',
-          metric: `${this.formatNumber(recentVisitors)} vs ${this.formatNumber(olderVisitors)}`,
-          change: parseFloat(visitorChange.toFixed(1)),
-          icon: visitorChange > 0 ? 'trending_up' : 'trending_down'
-        });
-      }
-    }
-
-    // 3. Engagement rate trend
-    const recentEngagement = recentEvents.length > 0
-      ? (recentEvents.reduce((sum, e) => sum + (e.review_count || 0), 0) / 
-         recentEvents.reduce((sum, e) => sum + (e.view_count || 1), 0)) * 100
-      : 0;
-    const olderEngagement = olderEvents.length > 0
-      ? (olderEvents.reduce((sum, e) => sum + (e.review_count || 0), 0) / 
-         olderEvents.reduce((sum, e) => sum + (e.view_count || 1), 0)) * 100
-      : 0;
-    
-    if (olderEngagement > 0) {
-      const engagementChange = recentEngagement - olderEngagement;
-      if (Math.abs(engagementChange) > 2) {
-        signals.push({
-          type: engagementChange > 0 ? 'positive' : 'negative',
-          title: engagementChange > 0 ? 'Engagement Rising' : 'Engagement Falling',
-          description: engagementChange > 0 
-            ? 'Visitors are leaving more reviews on events' 
-            : 'Visitors are less engaged with rating events',
-          metric: `${recentEngagement.toFixed(1)}% vs ${olderEngagement.toFixed(1)}%`,
-          change: parseFloat(engagementChange.toFixed(1)),
-          icon: engagementChange > 0 ? 'star' : 'warning'
-        });
-      }
-    }
-
-    // 4. Find hot category (fastest growing)
-    const categoryGrowth = categories.map(cat => {
-      const catRecent = recentEvents.filter(e => e.category_id === cat.id);
-      const catOlder = olderEvents.filter(e => e.category_id === cat.id);
-      const growth = catOlder.length > 0 
-        ? ((catRecent.length - catOlder.length) / catOlder.length) * 100 
-        : catRecent.length > 0 ? 100 : 0;
-      return { name: cat.name, growth, recentCount: catRecent.length };
-    }).filter(c => c.recentCount > 0);
-
-    const hotCategory = categoryGrowth.sort((a, b) => b.growth - a.growth)[0];
-    const coldCategory = categoryGrowth.sort((a, b) => a.growth - b.growth)[0];
-
-    if (hotCategory && hotCategory.growth > 20) {
-      signals.push({
-        type: 'positive',
-        title: `${hotCategory.name} is Hot`,
-        description: `This category is seeing rapid growth in event numbers`,
-        metric: `${hotCategory.recentCount} recent events`,
-        change: parseFloat(hotCategory.growth.toFixed(1)),
-        icon: 'trending_up'
-      });
-    }
-
-    if (coldCategory && coldCategory.growth < -20) {
-      signals.push({
-        type: 'negative',
-        title: `${coldCategory.name} is Cooling`,
-        description: `This category has fewer events recently`,
-        metric: `${coldCategory.recentCount} recent events`,
-        change: parseFloat(coldCategory.growth.toFixed(1)),
-        icon: 'trending_down'
-      });
-    }
-
-    // 5. Quality alert - high volume, low rating recent events
-    const qualityAlerts = recentEvents.filter(e => 
-      (e.visitor_count || 0) > 500 && (e.avg_rating || 0) < 3.5
-    );
-    
-    if (qualityAlerts.length > 0) {
-      signals.push({
-        type: 'negative',
-        title: 'Quality Alert',
-        description: `${qualityAlerts.length} popular recent events have low ratings`,
-        metric: `${qualityAlerts.length} events below 3.5★`,
-        change: -qualityAlerts.length,
-        icon: 'warning'
-      });
-    }
-
-    // 6. Star performers - high rating with good visitors
-    const starPerformers = recentEvents.filter(e => 
-      (e.visitor_count || 0) > 500 && (e.avg_rating || 0) >= 4.5
-    );
-    
-    if (starPerformers.length > 0) {
-      signals.push({
-        type: 'positive',
-        title: 'Star Performers',
-        description: `${starPerformers.length} recent events achieved excellence`,
-        metric: `${starPerformers.length} events above 4.5★`,
-        change: starPerformers.length,
-        icon: 'star'
-      });
-    }
-
-    this.trendSignals.set(signals);
-  }
-
-  calculateCategoryTrends(events: EventWithRelations[], categories: Category[]) {
-    const now = new Date();
-    const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-
-    const trends = categories.map(cat => {
-      const recentEvents = events.filter(e => 
-        e.category_id === cat.id && new Date(e.event_date) >= threeMonthsAgo
-      );
-      const olderEvents = events.filter(e => {
-        const date = new Date(e.event_date);
-        return e.category_id === cat.id && date < threeMonthsAgo && date >= sixMonthsAgo;
-      });
-
-      const recentAvgRating = recentEvents.length > 0
-        ? recentEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / recentEvents.length
-        : 0;
-      const olderAvgRating = olderEvents.length > 0
-        ? olderEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / olderEvents.length
-        : 0;
-
-      const ratingChange = olderAvgRating > 0 
-        ? ((recentAvgRating - olderAvgRating) / olderAvgRating) * 100 
-        : 0;
-      const growthRate = olderEvents.length > 0 
-        ? ((recentEvents.length - olderEvents.length) / olderEvents.length) * 100 
-        : recentEvents.length > 0 ? 100 : 0;
-
-      let momentum: 'rising' | 'falling' | 'stable' = 'stable';
-      if (growthRate > 15 || ratingChange > 10) momentum = 'rising';
-      if (growthRate < -15 || ratingChange < -10) momentum = 'falling';
-
-      return {
-        name: cat.name,
-        color: cat.color,
-        recentAvgRating: parseFloat(recentAvgRating.toFixed(1)),
-        olderAvgRating: parseFloat(olderAvgRating.toFixed(1)),
-        ratingChange: parseFloat(ratingChange.toFixed(1)),
-        recentEvents: recentEvents.length,
-        olderEvents: olderEvents.length,
-        growthRate: parseFloat(growthRate.toFixed(1)),
-        momentum
-      };
-    }).filter(t => t.recentEvents > 0 || t.olderEvents > 0);
-
-    this.categoryTrends.set(trends.sort((a, b) => b.growthRate - a.growthRate));
-  }
-
-  calculateSeasonalPatterns(events: EventWithRelations[], categories: Category[]) {
-    const seasonMap: Record<string, EventWithRelations[]> = {
-      'Winter': [],
-      'Spring': [],
-      'Summer': [],
-      'Fall': []
-    };
-
-    events.forEach(event => {
-      const month = new Date(event.event_date).getMonth();
-      if (month >= 11 || month <= 1) seasonMap['Winter'].push(event);
-      else if (month >= 2 && month <= 4) seasonMap['Spring'].push(event);
-      else if (month >= 5 && month <= 7) seasonMap['Summer'].push(event);
-      else seasonMap['Fall'].push(event);
-    });
-
-    const patterns: SeasonalPattern[] = Object.entries(seasonMap).map(([season, seasonEvents]) => {
-      const avgRating = seasonEvents.length > 0
-        ? seasonEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / seasonEvents.length
-        : 0;
-
-      // Find best category for this season
-      const categoryPerformance = categories.map(cat => {
-        const catEvents = seasonEvents.filter(e => e.category_id === cat.id);
-        return {
-          name: cat.name,
-          color: cat.color,
-          count: catEvents.length,
-          avgRating: catEvents.length > 0
-            ? catEvents.reduce((sum, e) => sum + (e.avg_rating || 0), 0) / catEvents.length
-            : 0
-        };
-      }).filter(c => c.count > 0);
-
-      const bestCat = categoryPerformance.sort((a, b) => b.avgRating - a.avgRating)[0];
-
-      return {
-        season,
-        eventCount: seasonEvents.length,
-        avgRating: parseFloat(avgRating.toFixed(1)),
-        bestCategory: bestCat?.name || 'N/A',
-        bestCategoryColor: bestCat?.color || '#888'
-      };
-    });
-
-    this.seasonalPatterns.set(patterns);
-  }
-
-  calculateBestWorstMonths(events: EventWithRelations[]) {
-    const monthlyStats = this.monthlyData();
-    if (monthlyStats.length === 0) return;
-
-    // Best month: highest combination of events and rating
-    const scored = monthlyStats.map(m => ({
-      ...m,
-      score: (m.eventCount * 10) + (m.avgRating * 20)
-    }));
-
-    const best = scored.sort((a, b) => b.score - a.score)[0];
-    const worst = scored.sort((a, b) => a.score - b.score)[0];
-
-    this.bestMonth.set({
-      month: best.month,
-      reason: `${best.eventCount} events with ${best.avgRating}★ avg`
-    });
-
-    this.worstMonth.set({
-      month: worst.month,
-      reason: `${worst.eventCount} events with ${worst.avgRating}★ avg`
-    });
   }
 
   // Computed values

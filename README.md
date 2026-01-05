@@ -2,6 +2,11 @@
 
 A full-stack Angular application for tracking events, user interactions, and gathering analytics data. Uses Supabase (PostgreSQL) as the persistent database.
 
+## Documentation
+
+- **[SOURCES.md](SOURCES.md)**: Complete documentation of sources, AI conversations, architecture decisions, and development timeline
+- **[TRACKING_GUIDE.md](TRACKING_GUIDE.md)**: User tracking implementation guide
+
 ## Features
 
 - **Persistent Database**: Supabase (PostgreSQL) for data storage
