@@ -1,6 +1,8 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupabaseService, EventWithRelations, Category, City } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 interface CategoryStats {
   id: string;
@@ -85,6 +87,8 @@ interface SeasonalPattern {
 })
 export class Analytics implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
+  private useLocalApi = environment.useLocalApi || false;
   protected readonly loading = signal<boolean>(true);
   
   // Overall stats
@@ -149,16 +153,22 @@ export class Analytics implements OnInit {
 
   async loadData() {
     // Load all events
-    const events = await this.supabase.getEvents();
-    this.allEvents.set(events);
+    const events = this.useLocalApi
+      ? await this.apiService.getEvents()
+      : await this.supabase.getEvents();
+    this.allEvents.set(events as EventWithRelations[]);
 
     // Load categories
-    const categoriesData = await this.supabase.getCategories();
-    this.categories.set(categoriesData);
+    const categoriesData = this.useLocalApi
+      ? await this.apiService.getCategories()
+      : await this.supabase.getCategories();
+    this.categories.set(categoriesData as Category[]);
 
     // Load cities
-    const citiesData = await this.supabase.getCities();
-    this.cities.set(citiesData);
+    const citiesData = this.useLocalApi
+      ? await this.apiService.getCities()
+      : await this.supabase.getCities();
+    this.cities.set(citiesData as City[]);
 
     // Calculate overall stats
     this.calculateOverallStats(events);

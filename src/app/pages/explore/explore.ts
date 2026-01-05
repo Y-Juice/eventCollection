@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SupabaseService, EventWithRelations, City, Category } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-explore',
@@ -12,7 +14,9 @@ import { SupabaseService, EventWithRelations, City, Category } from '../../servi
 })
 export class Explore implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
   private router = inject(Router);
+  private useLocalApi = environment.useLocalApi || false;
   protected readonly searchQuery = signal<string>('');
   protected readonly selectedCity = signal<string>('all');
   protected readonly selectedCategory = signal<string>('all');
@@ -27,14 +31,18 @@ export class Explore implements OnInit {
   async ngOnInit() {
     try {
       // Load cities
-      const citiesData = await this.supabase.getCities();
+      const citiesData = this.useLocalApi
+        ? await this.apiService.getCities()
+        : await this.supabase.getCities();
       this.cities.set([
         { id: 'all', name: 'All Cities' },
         ...citiesData.map(c => ({ id: c.id, name: c.name }))
       ]);
       
       // Load categories
-      const categoriesData = await this.supabase.getCategories();
+      const categoriesData = this.useLocalApi
+        ? await this.apiService.getCategories()
+        : await this.supabase.getCategories();
       this.categories.set([
         { id: 'all', name: 'All', color: '#7B68C8' },
         ...categoriesData.map(c => ({ id: c.id, name: c.name, color: c.color }))
@@ -51,8 +59,10 @@ export class Explore implements OnInit {
 
   async loadEvents() {
     try {
-      const events = await this.supabase.getEvents();
-      this.allEvents.set(events);
+      const events = this.useLocalApi
+        ? await this.apiService.getEvents()
+        : await this.supabase.getEvents();
+      this.allEvents.set(events as EventWithRelations[]);
     } catch (error) {
       console.error('Error loading events:', error);
     }

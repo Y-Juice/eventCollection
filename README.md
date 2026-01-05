@@ -1,59 +1,138 @@
-# EventCollection
+# Event Collection
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.1.
+A full-stack Angular application for tracking events, user interactions, and gathering analytics data. Uses Supabase (PostgreSQL) as the persistent database.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Persistent Database**: Supabase (PostgreSQL) for data storage
+- **Docker Environment**: Containerized frontend for consistent development
+- **Data Validation**: Input sanitization and validation before database storage
+- **Data Visualization**: Analytics dashboard with trends, charts, and insights
+- **User-Level Tracking**: Distinguished users with unique IDs (UID) for personalized experiences
+- **Data-Driven UI**: User data influences event recommendations and display
 
-```bash
-ng serve
-```
+## Quick Start with Docker
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Prerequisites
 
-## Code scaffolding
+- [Docker](https://www.docker.com/get-started) installed and running
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Running the Application
 
-```bash
-ng generate component component-name
-```
+1. **Create environment file**
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+   ```bash
+   cp env.example .env
+   ```
 
-```bash
-ng generate --help
-```
+2. **Start the application**
 
-## Building
+   ```bash
+   docker compose up --build
+   ```
 
-To build the project run:
+3. **Access the application**
 
-```bash
-ng build
-```
+   Open [http://localhost:4200](http://localhost:4200)
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Stopping the Application
 
 ```bash
-ng test
+docker compose down
 ```
 
-## Running end-to-end tests
+## Project Structure
 
-For end-to-end (e2e) testing, run:
+```
+eventCollection/
+├── src/
+│   ├── app/
+│   │   ├── pages/          # Page components
+│   │   │   ├── home/       # Home page with events
+│   │   │   ├── explore/    # Event exploration
+│   │   │   ├── ratings/    # User ratings
+│   │   │   ├── analytics/  # Data visualization
+│   │   │   ├── admin/      # Admin dashboard
+│   │   │   └── event-detail/  # Event detail view
+│   │   ├── services/       # API and tracking services
+│   │   └── directives/     # Tracking directives
+│   └── environments/       # Environment configuration
+├── docker-compose.yml      # Docker configuration
+├── Dockerfile              # Frontend container
+├── env.example             # Environment template
+└── package.json
+```
+
+## Database (Supabase/PostgreSQL)
+
+### Tables
+
+| Table | Description |
+|-------|-------------|
+| `cities` | Event locations (Brussels, Antwerp, Ghent, etc.) |
+| `categories` | Event categories (Music, Food, Culture, Sports, Art, Tech) |
+| `events` | Event details with date, time, and location |
+| `ratings` | User ratings with scores (1-5) and reviews |
+| `visits` | User check-ins to events |
+| `event_views` | Tracks which users viewed which events |
+| `user_events` | Detailed user interaction tracking |
+| `user_profiles` | User profile information |
+
+### Data Validation
+
+All data is validated before storage:
+
+- String inputs are trimmed
+- Scores validated to be integers between 1-5
+- UUIDs validated for proper format
+- Numeric fields (coordinates, dimensions) are rounded to integers
+
+## User Tracking
+
+Each user is assigned a unique anonymous ID stored in localStorage. This enables:
+
+- Personalized event recommendations
+- Rating and attendance history
+- Behavioral analytics
+- Session tracking
+
+Data collected includes:
+- Page views and navigation
+- Click interactions
+- Scroll behavior
+- Event ratings and check-ins
+
+## Analytics & Visualization
+
+The Analytics page provides:
+
+- **Trend Signals**: Emerging, rising, and declining categories
+- **Category Momentum**: Performance by event category
+- **Seasonal Patterns**: Monthly event distribution
+- **Best/Worst Months**: Peak and low activity periods
+- **Rating Distributions**: User satisfaction metrics
+
+## Development (without Docker)
 
 ```bash
-ng e2e
+npm install
+npm start
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Open [http://localhost:4200](http://localhost:4200)
 
-## Additional Resources
+## Requirements Checklist
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Requirement | Implementation |
+|-------------|----------------|
+| Persistent database | ✅ Supabase (PostgreSQL) |
+| Docker environment | ✅ Containerized frontend |
+| Single command startup | ✅ `docker compose up --build` |
+| Data validation | ✅ Input sanitization in services |
+| Data visualization | ✅ Analytics dashboard |
+| User-level tracking (UID) | ✅ Anonymous user IDs |
+| Data influences UI | ✅ Ratings, visitors, recommendations |
+
+## License
+
+MIT

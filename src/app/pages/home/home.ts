@@ -2,7 +2,9 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService, EventWithRelations, City, Category } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
 import { UserTrackingService } from '../../services/user-tracking.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -12,8 +14,10 @@ import { UserTrackingService } from '../../services/user-tracking.service';
 })
 export class Home implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
   private trackingService = inject(UserTrackingService);
   private router = inject(Router);
+  private useLocalApi = environment.useLocalApi || false;
   protected readonly cities = signal<City[]>([]);
   protected readonly selectedCity = signal<string>('Brussels');
   protected readonly categories = signal<Category[]>([]);
@@ -32,11 +36,15 @@ export class Home implements OnInit {
       });
 
       // Load cities
-      const citiesData = await this.supabase.getCities();
+      const citiesData = this.useLocalApi 
+        ? await this.apiService.getCities()
+        : await this.supabase.getCities();
       this.cities.set(citiesData);
       
       // Load categories and add "all" option
-      const categoriesData = await this.supabase.getCategories();
+      const categoriesData = this.useLocalApi
+        ? await this.apiService.getCategories()
+        : await this.supabase.getCategories();
       this.categories.set([
         { id: 'all', name: 'All', color: '#000000' },
         ...categoriesData
@@ -54,11 +62,16 @@ export class Home implements OnInit {
   async loadEvents() {
     try {
       const city = this.cities().find(c => c.name === this.selectedCity());
-      const events = await this.supabase.getEvents({
-        cityId: city?.id,
-        categoryId: this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined
-      });
-      this.allEvents.set(events);
+      const events = this.useLocalApi
+        ? await this.apiService.getEvents({
+            cityId: city?.id,
+            categoryId: this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined
+          })
+        : await this.supabase.getEvents({
+            cityId: city?.id,
+            categoryId: this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined
+          });
+      this.allEvents.set(events as EventWithRelations[]);
     } catch (error) {
       console.error('Error loading events:', error);
     }

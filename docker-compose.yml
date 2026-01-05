@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Angular Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eventcollection-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    ports:
+      - "${FRONTEND_PORT:-4200}:4200"
+    volumes:
+      - ./src:/app/src
+      - ./angular.json:/app/angular.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./package.json:/app/package.json
+      - /app/node_modules

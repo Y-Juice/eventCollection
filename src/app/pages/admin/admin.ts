@@ -2,6 +2,8 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService, UserProfile, EventWithRelations, Rating, Category, City } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 interface UserWithStats extends UserProfile {
   ratingCount: number;
@@ -26,6 +28,8 @@ type UserAction = 'view' | 'warn' | 'suspend' | 'delete';
 })
 export class Admin implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
+  private useLocalApi = environment.useLocalApi || false;
   
   // Loading state
   protected readonly loading = signal<boolean>(true);
@@ -84,37 +88,52 @@ export class Admin implements OnInit {
   }
 
   async loadAllData() {
-    const [categoriesData, citiesData, eventsData, ratingsData] = await Promise.all([
-      this.supabase.getCategories(),
-      this.supabase.getCities(),
-      this.supabase.getEvents(),
-      this.loadAllRatings()
-    ]);
+    let categoriesData: Category[];
+    let citiesData: City[];
+    let eventsData: EventWithRelations[];
+    
+    if (this.useLocalApi) {
+      [categoriesData, citiesData, eventsData] = await Promise.all([
+        this.apiService.getCategories(),
+        this.apiService.getCities(),
+        this.apiService.getEvents()
+      ]);
+    } else {
+      [categoriesData, citiesData, eventsData] = await Promise.all([
+        this.supabase.getCategories(),
+        this.supabase.getCities(),
+        this.supabase.getEvents()
+      ]);
+    }
+    
+    const ratingsData = await this.loadAllRatings();
 
-    this.categories.set(categoriesData);
-    this.cities.set(citiesData);
-    this.events.set(eventsData);
+    this.categories.set(categoriesData as Category[]);
+    this.cities.set(citiesData as City[]);
+    this.events.set(eventsData as EventWithRelations[]);
     
     // Load users with stats
-    await this.loadUsersWithStats(ratingsData);
+    await this.loadUsersWithStats(ratingsData as Rating[]);
     
     // Calculate stats
-    this.calculateStats(eventsData, ratingsData);
+    this.calculateStats(eventsData as EventWithRelations[], ratingsData as Rating[]);
   }
 
   async loadAllRatings(): Promise<Rating[]> {
     // Get all ratings from the service
-    const ratings = await this.supabase.getAllRatings();
+    const ratings = this.useLocalApi
+      ? await this.apiService.getAllRatings()
+      : await this.supabase.getAllRatings();
     
     // Enhance with user and event info
     const enhancedRatings: RatingWithDetails[] = ratings.map(r => ({
       ...r,
       userName: 'User',
-      eventTitle: r.event?.title || 'Unknown Event'
+      eventTitle: (r as any).event?.title || 'Unknown Event'
     }));
     
     this.ratings.set(enhancedRatings);
-    return ratings;
+    return ratings as Rating[];
   }
 
   async loadUsersWithStats(ratings: Rating[]) {
@@ -379,7 +398,11 @@ export class Admin implements OnInit {
     const selected = this.selectedEvents();
     for (const eventId of selected) {
       try {
-        await this.supabase.deleteEvent(eventId);
+        if (this.useLocalApi) {
+          await this.apiService.deleteEvent(eventId);
+        } else {
+          await this.supabase.deleteEvent(eventId);
+        }
       } catch (error) {
         console.error('Failed to delete event:', eventId, error);
       }
@@ -394,7 +417,11 @@ export class Admin implements OnInit {
     const selected = this.selectedRatings();
     for (const ratingId of selected) {
       try {
-        await this.supabase.deleteRating(ratingId);
+        if (this.useLocalApi) {
+          await this.apiService.deleteRating(ratingId);
+        } else {
+          await this.supabase.deleteRating(ratingId);
+        }
       } catch (error) {
         console.error('Failed to delete rating:', ratingId, error);
       }

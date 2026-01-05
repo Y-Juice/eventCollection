@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 import { filter } from 'rxjs/operators';
 
 export interface UserEvent {
@@ -47,6 +49,7 @@ export interface FileMetadata {
 })
 export class UserTrackingService {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
   private router = inject(Router);
   private sessionId = this.generateSessionId();
   private userId = signal<string | null>(null);
@@ -55,6 +58,7 @@ export class UserTrackingService {
   private flushInterval = 5000; // 5 seconds
   private flushTimer: any = null;
   private isInitialized = false;
+  private useLocalApi = environment.useLocalApi || false;
 
   constructor() {
     this.initializeTracking();
@@ -83,6 +87,11 @@ export class UserTrackingService {
   }
 
   private setupAuthListener() {
+    // Skip Supabase auth listener if using local API
+    if (this.useLocalApi) {
+      return;
+    }
+
     // Listen to auth state changes from Supabase
     this.supabase.client.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
@@ -157,18 +166,23 @@ export class UserTrackingService {
     let uid = this.userId();
     
     if (!uid) {
-      // Try to get authenticated user first
-      const authUser = this.supabase.getCurrentUser();
-      if (authUser?.id) {
-        uid = authUser.id;
+      if (this.useLocalApi) {
+        // Use API service for local user ID
+        uid = this.apiService.getCurrentUserId();
       } else {
-        // Generate or retrieve anonymous UID from localStorage
-        const storedUid = localStorage.getItem('anonymous_user_id');
-        if (storedUid) {
-          uid = storedUid;
+        // Try to get authenticated user first from Supabase
+        const authUser = this.supabase.getCurrentUser();
+        if (authUser?.id) {
+          uid = authUser.id;
         } else {
-          uid = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          localStorage.setItem('anonymous_user_id', uid);
+          // Generate or retrieve anonymous UID from localStorage
+          const storedUid = localStorage.getItem('anonymous_user_id');
+          if (storedUid) {
+            uid = storedUid;
+          } else {
+            uid = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('anonymous_user_id', uid);
+          }
         }
       }
       this.userId.set(uid);
@@ -413,7 +427,11 @@ export class UserTrackingService {
     });
 
     try {
-      await this.supabase.saveUserEvents(sanitizedEvents);
+      if (this.useLocalApi) {
+        await this.apiService.saveUserEvents(sanitizedEvents);
+      } else {
+        await this.supabase.saveUserEvents(sanitizedEvents);
+      }
     } catch (error) {
       console.error('Error flushing events:', error);
       // Re-queue events if flush failed (unless forced)

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SupabaseService, EventWithRelations, Rating } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-event-detail',
@@ -12,8 +14,10 @@ import { SupabaseService, EventWithRelations, Rating } from '../../services/supa
 })
 export class EventDetail implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private useLocalApi = environment.useLocalApi || false;
 
   // Loading states
   protected readonly loading = signal<boolean>(true);
@@ -66,27 +70,42 @@ export class EventDetail implements OnInit {
 
   async loadEventData(eventId: string) {
     // Load event
-    const eventData = await this.supabase.getEventById(eventId);
+    const eventData = this.useLocalApi
+      ? await this.apiService.getEventById(eventId)
+      : await this.supabase.getEventById(eventId);
+    
     if (!eventData) {
       this.router.navigate(['/']);
       return;
     }
-    this.event.set(eventData);
+    this.event.set(eventData as EventWithRelations);
 
     // Track view
-    await this.supabase.trackEventView(eventId);
+    if (this.useLocalApi) {
+      await this.apiService.trackEventView(eventId);
+    } else {
+      await this.supabase.trackEventView(eventId);
+    }
 
     // Check if user has checked in
-    const checkedIn = await this.supabase.hasUserCheckedIn(eventId);
+    const checkedIn = this.useLocalApi
+      ? await this.apiService.hasUserCheckedIn(eventId)
+      : await this.supabase.hasUserCheckedIn(eventId);
     this.hasCheckedIn.set(checkedIn);
 
     // Load existing rating if any
-    const user = this.supabase.getCurrentUser();
-    if (user) {
-      const ratings = await this.supabase.getEventRatings(eventId);
-      const userRating = ratings.find(r => r.user_id === user.id);
+    const userId = this.useLocalApi 
+      ? this.apiService.getCurrentUserId()
+      : this.supabase.getCurrentUser()?.id;
+    
+    if (userId) {
+      const ratings = this.useLocalApi
+        ? await this.apiService.getEventRatings(eventId)
+        : await this.supabase.getEventRatings(eventId);
+      
+      const userRating = ratings.find(r => r.user_id === userId);
       if (userRating) {
-        this.existingRating.set(userRating);
+        this.existingRating.set(userRating as Rating);
         this.userRating.set(userRating.score);
         this.wasPresent.set(userRating.was_present);
         this.reviewText.set(userRating.review || '');
@@ -119,7 +138,11 @@ export class EventDetail implements OnInit {
     if (!eventData) return;
 
     try {
-      await this.supabase.checkIn(eventData.id);
+      if (this.useLocalApi) {
+        await this.apiService.checkIn(eventData.id);
+      } else {
+        await this.supabase.checkIn(eventData.id);
+      }
       this.hasCheckedIn.set(true);
       this.wasPresent.set(true);
     } catch (error) {
@@ -134,19 +157,31 @@ export class EventDetail implements OnInit {
     this.submitting.set(true);
 
     try {
-      await this.supabase.createRating(
-        eventData.id,
-        this.userRating(),
-        this.reviewText() || undefined,
-        this.wasPresent()
-      );
+      if (this.useLocalApi) {
+        await this.apiService.createRating(
+          eventData.id,
+          this.userRating(),
+          this.reviewText() || undefined,
+          this.wasPresent()
+        );
+      } else {
+        await this.supabase.createRating(
+          eventData.id,
+          this.userRating(),
+          this.reviewText() || undefined,
+          this.wasPresent()
+        );
+      }
 
       this.submitted.set(true);
 
       // Reload event to get updated stats
-      const updatedEvent = await this.supabase.getEventById(eventData.id);
+      const updatedEvent = this.useLocalApi
+        ? await this.apiService.getEventById(eventData.id)
+        : await this.supabase.getEventById(eventData.id);
+      
       if (updatedEvent) {
-        this.event.set(updatedEvent);
+        this.event.set(updatedEvent as EventWithRelations);
       }
 
       // Show success for a moment then reset

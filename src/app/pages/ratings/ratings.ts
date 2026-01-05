@@ -2,6 +2,8 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService, EventWithRelations, Rating } from '../../services/supabase.service';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 interface PendingEvent {
   event: EventWithRelations;
@@ -16,6 +18,8 @@ interface PendingEvent {
 })
 export class Ratings implements OnInit {
   private supabase = inject(SupabaseService);
+  private apiService = inject(ApiService);
+  private useLocalApi = environment.useLocalApi || false;
   protected readonly loading = signal<boolean>(true);
   protected readonly activeTab = signal<'pending' | 'history'>('pending');
   protected readonly showRatingModal = signal<boolean>(false);
@@ -50,34 +54,65 @@ export class Ratings implements OnInit {
 
   async loadData() {
     // Load user ratings
-    const ratings = await this.supabase.getUserRatings();
-    this.ratingHistory.set(ratings);
+    const ratings = this.useLocalApi
+      ? await this.apiService.getUserRatings()
+      : await this.supabase.getUserRatings();
+    this.ratingHistory.set(ratings as Rating[]);
 
-    // Load pending events (visited but not rated)
-    const pending = await this.supabase.getUserPendingRatings();
-    const visits = await this.supabase.getUserVisits();
-    const visitEventIds = new Set(visits.map(v => v.event_id));
-    
-    const pendingEvents = pending.map(event => ({
-      event,
-      checkedIn: visitEventIds.has(event.id)
-    }));
-    this.pendingEvents.set(pendingEvents);
+    // For local API, we use a simplified approach
+    if (this.useLocalApi) {
+      // Load all events and filter for pending (visited but not rated)
+      const allEvents = await this.apiService.getEvents();
+      const ratedEventIds = new Set(ratings.map(r => r.event_id));
+      const pending = allEvents.filter(e => !ratedEventIds.has(e.id));
+      
+      const pendingEvents = pending.map(event => ({
+        event: event as EventWithRelations,
+        checkedIn: true
+      }));
+      this.pendingEvents.set(pendingEvents);
 
-    // Calculate user stats
-    const totalRatings = ratings.length;
-    const totalReviews = ratings.filter(r => r.review && r.review.trim() !== '').length;
-    const eventsAttended = visits.length;
-    const avgRating = totalRatings > 0
-      ? ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings
-      : 0;
+      // Calculate user stats
+      const totalRatings = ratings.length;
+      const totalReviews = ratings.filter(r => r.review && r.review.trim() !== '').length;
+      const eventsAttended = totalRatings;
+      const avgRating = totalRatings > 0
+        ? ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings
+        : 0;
 
-    this.userStats.set({
-      totalRatings,
-      totalReviews,
-      eventsAttended,
-      avgRating: parseFloat(avgRating.toFixed(1))
-    });
+      this.userStats.set({
+        totalRatings,
+        totalReviews,
+        eventsAttended,
+        avgRating: parseFloat(avgRating.toFixed(1))
+      });
+    } else {
+      // Load pending events (visited but not rated)
+      const pending = await this.supabase.getUserPendingRatings();
+      const visits = await this.supabase.getUserVisits();
+      const visitEventIds = new Set(visits.map(v => v.event_id));
+      
+      const pendingEvents = pending.map(event => ({
+        event,
+        checkedIn: visitEventIds.has(event.id)
+      }));
+      this.pendingEvents.set(pendingEvents);
+
+      // Calculate user stats
+      const totalRatings = ratings.length;
+      const totalReviews = ratings.filter(r => r.review && r.review.trim() !== '').length;
+      const eventsAttended = visits.length;
+      const avgRating = totalRatings > 0
+        ? ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings
+        : 0;
+
+      this.userStats.set({
+        totalRatings,
+        totalReviews,
+        eventsAttended,
+        avgRating: parseFloat(avgRating.toFixed(1))
+      });
+    }
   }
 
   // Computed values
@@ -93,7 +128,11 @@ export class Ratings implements OnInit {
 
   async checkIn(eventId: string): Promise<void> {
     try {
-      await this.supabase.checkIn(eventId);
+      if (this.useLocalApi) {
+        await this.apiService.checkIn(eventId);
+      } else {
+        await this.supabase.checkIn(eventId);
+      }
       const updated = this.pendingEvents().map(p => 
         p.event.id === eventId ? { ...p, checkedIn: true } : p
       );
@@ -133,13 +172,22 @@ export class Ratings implements OnInit {
     if (!event || this.ratingScore() === 0) return;
 
     try {
-      // Create rating in Supabase
-      const newRating = await this.supabase.createRating(
-        event.id,
-        this.ratingScore(),
-        this.ratingReview() || undefined,
-        this.wasPresent()
-      );
+      // Create rating
+      if (this.useLocalApi) {
+        await this.apiService.createRating(
+          event.id,
+          this.ratingScore(),
+          this.ratingReview() || undefined,
+          this.wasPresent()
+        );
+      } else {
+        await this.supabase.createRating(
+          event.id,
+          this.ratingScore(),
+          this.ratingReview() || undefined,
+          this.wasPresent()
+        );
+      }
 
       // Reload data
       await this.loadData();
