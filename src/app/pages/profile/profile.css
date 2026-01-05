@@ -432,6 +432,60 @@
 }
 
 /* Logout */
+/* Admin Section */
+.admin-section {
+  border-top: 1px solid #EEE;
+  margin-top: 8px;
+  padding-top: 24px !important;
+}
+
+.admin-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: linear-gradient(135deg, #1A1A2E 0%, #2D2D44 100%);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 26, 46, 0.3);
+}
+
+.admin-link-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-link-content svg {
+  fill: #9B7EDE;
+}
+
+.admin-link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-link-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+}
+
+.admin-link-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-link-arrow {
+  fill: rgba(255, 255, 255, 0.5);
+}
+
 .logout-section {
   padding: 0 20px 40px;
 }

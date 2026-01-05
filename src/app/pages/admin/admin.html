@@ -1,0 +1,585 @@
+<div class="admin-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-content">
+      <h1 class="admin-title">Admin Dashboard</h1>
+      <p class="admin-subtitle">Manage users, events, and content</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="loadAllData()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon users">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().totalUsers }}</span>
+        <span class="stat-label">Total Users</span>
+        <span class="stat-sub">{{ stats().activeUsers }} active</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon events">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().totalEvents }}</span>
+        <span class="stat-label">Total Events</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon ratings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().totalRatings }}</span>
+        <span class="stat-label">Total Ratings</span>
+        <span class="stat-sub">{{ stats().avgRating }}★ avg</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon flagged">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ stats().flaggedContent }}</span>
+        <span class="stat-label">Low Ratings</span>
+        <span class="stat-sub">Need review</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'users'"
+      (click)="setActiveTab('users')"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+      </svg>
+      Users
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'events'"
+      (click)="setActiveTab('events')"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+      </svg>
+      Events
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'ratings'"
+      (click)="setActiveTab('ratings')"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      Ratings
+    </button>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="content-area">
+    <!-- Users Tab -->
+    @if (activeTab() === 'users') {
+      <div class="tab-content">
+        <!-- Filters & Actions Bar -->
+        <div class="toolbar">
+          <div class="filters">
+            <div class="search-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input 
+                type="text" 
+                placeholder="Search users..." 
+                [ngModel]="userSearch()"
+                (ngModelChange)="userSearch.set($event)"
+              />
+            </div>
+            <select 
+              class="filter-select"
+              [ngModel]="userCityFilter()"
+              (ngModelChange)="userCityFilter.set($event)"
+            >
+              <option value="">All Cities</option>
+              @for (city of cities(); track city.id) {
+                <option [value]="city.name">{{ city.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="actions">
+            @if (selectedUsers().size > 0) {
+              <span class="selection-count">{{ selectedUsers().size }} selected</span>
+              <button class="btn-action delete" (click)="confirmDeleteUsers()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Delete
+              </button>
+              <button class="btn-action clear" (click)="clearSelections()">Clear</button>
+            }
+            <button class="btn-action select-all" (click)="selectAllUsers()">Select All</button>
+            <button class="btn-action export" (click)="exportUsers()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="data-table">
+          <div class="table-header">
+            <div class="col-check"></div>
+            <div class="col-user">User</div>
+            <div class="col-stats">Ratings</div>
+            <div class="col-stats">Avg Score</div>
+            <div class="col-date">Last Active</div>
+            <div class="col-actions">Actions</div>
+          </div>
+          <div class="table-body">
+            @for (user of filteredUsers(); track user.id) {
+              <div class="table-row" [class.selected]="selectedUsers().has(user.id)">
+                <div class="col-check">
+                  <input 
+                    type="checkbox" 
+                    [checked]="selectedUsers().has(user.id)"
+                    (change)="toggleUserSelection(user.id)"
+                  />
+                </div>
+                <div class="col-user">
+                  <div class="user-avatar">{{ getUserInitials(user.name) }}</div>
+                  <div class="user-info">
+                    <span class="user-name">{{ user.name || 'Unknown' }}</span>
+                    <span class="user-id">{{ user.id }}</span>
+                  </div>
+                </div>
+                <div class="col-stats">
+                  <span class="stat-badge">{{ user.ratingCount }}</span>
+                </div>
+                <div class="col-stats">
+                  <span class="rating-badge" [class]="getScoreClass(user.avgRating)">
+                    {{ user.avgRating }}★
+                  </span>
+                </div>
+                <div class="col-date">{{ formatDateTime(user.lastActivity) }}</div>
+                <div class="col-actions">
+                  <button class="btn-icon" title="View Details" (click)="openUserDetails(user)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+            @if (filteredUsers().length === 0) {
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p>No users found</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Events Tab -->
+    @if (activeTab() === 'events') {
+      <div class="tab-content">
+        <div class="toolbar">
+          <div class="filters">
+            <select 
+              class="filter-select"
+              [ngModel]="eventCategoryFilter()"
+              (ngModelChange)="eventCategoryFilter.set($event)"
+            >
+              <option value="">All Categories</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+            <select 
+              class="filter-select"
+              [ngModel]="eventCityFilter()"
+              (ngModelChange)="eventCityFilter.set($event)"
+            >
+              <option value="">All Cities</option>
+              @for (city of cities(); track city.id) {
+                <option [value]="city.id">{{ city.name }}</option>
+              }
+            </select>
+            <input 
+              type="date" 
+              class="filter-date"
+              [ngModel]="dateRangeStart()"
+              (ngModelChange)="dateRangeStart.set($event)"
+              placeholder="Start Date"
+            />
+            <input 
+              type="date" 
+              class="filter-date"
+              [ngModel]="dateRangeEnd()"
+              (ngModelChange)="dateRangeEnd.set($event)"
+              placeholder="End Date"
+            />
+          </div>
+          <div class="actions">
+            @if (selectedEvents().size > 0) {
+              <span class="selection-count">{{ selectedEvents().size }} selected</span>
+              <button class="btn-action delete" (click)="confirmDeleteEvents()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Delete
+              </button>
+              <button class="btn-action clear" (click)="clearSelections()">Clear</button>
+            }
+            <button class="btn-action select-all" (click)="selectAllEvents()">Select All</button>
+            <button class="btn-action export" (click)="exportEvents()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="data-table">
+          <div class="table-header">
+            <div class="col-check"></div>
+            <div class="col-event">Event</div>
+            <div class="col-category">Category</div>
+            <div class="col-city">City</div>
+            <div class="col-date">Date</div>
+            <div class="col-stats">Rating</div>
+            <div class="col-stats">Visitors</div>
+            <div class="col-actions">Actions</div>
+          </div>
+          <div class="table-body">
+            @for (event of filteredEvents(); track event.id) {
+              <div class="table-row" [class.selected]="selectedEvents().has(event.id)">
+                <div class="col-check">
+                  <input 
+                    type="checkbox" 
+                    [checked]="selectedEvents().has(event.id)"
+                    (change)="toggleEventSelection(event.id)"
+                  />
+                </div>
+                <div class="col-event">
+                  <div class="event-color" [style.background]="event.color"></div>
+                  <div class="event-info">
+                    <span class="event-title">{{ event.title }}</span>
+                    <span class="event-subtitle">{{ event.subtitle }}</span>
+                  </div>
+                </div>
+                <div class="col-category">
+                  <span class="category-badge" [style.background]="event.category?.color">
+                    {{ event.category?.name }}
+                  </span>
+                </div>
+                <div class="col-city">{{ event.city?.name }}</div>
+                <div class="col-date">{{ formatDate(event.event_date) }}</div>
+                <div class="col-stats">
+                  <span class="rating-badge" [class]="getScoreClass(event.avg_rating || 0)">
+                    {{ (event.avg_rating || 0).toFixed(1) }}★
+                  </span>
+                </div>
+                <div class="col-stats">{{ event.visitor_count || 0 }}</div>
+                <div class="col-actions">
+                  <button class="btn-icon" title="View Details" (click)="openEventDetails(event)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+            @if (filteredEvents().length === 0) {
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+                <p>No events found</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Ratings Tab -->
+    @if (activeTab() === 'ratings') {
+      <div class="tab-content">
+        <div class="toolbar">
+          <div class="filters">
+            <select 
+              class="filter-select"
+              [ngModel]="ratingScoreFilter()"
+              (ngModelChange)="ratingScoreFilter.set($event)"
+            >
+              <option [value]="0">All Scores</option>
+              <option [value]="1">1+ Stars</option>
+              <option [value]="2">2+ Stars</option>
+              <option [value]="3">3+ Stars</option>
+              <option [value]="4">4+ Stars</option>
+              <option [value]="5">5 Stars Only</option>
+            </select>
+          </div>
+          <div class="actions">
+            @if (selectedRatings().size > 0) {
+              <span class="selection-count">{{ selectedRatings().size }} selected</span>
+              <button class="btn-action delete" (click)="confirmDeleteRatings()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Delete
+              </button>
+              <button class="btn-action clear" (click)="clearSelections()">Clear</button>
+            }
+            <button class="btn-action select-all" (click)="selectAllRatings()">Select All</button>
+            <button class="btn-action export" (click)="exportRatings()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="data-table">
+          <div class="table-header">
+            <div class="col-check"></div>
+            <div class="col-event">Event</div>
+            <div class="col-user-sm">User ID</div>
+            <div class="col-score">Score</div>
+            <div class="col-review">Review</div>
+            <div class="col-presence">Present</div>
+            <div class="col-date">Date</div>
+            <div class="col-actions">Actions</div>
+          </div>
+          <div class="table-body">
+            @for (rating of filteredRatings(); track rating.id) {
+              <div class="table-row" [class.selected]="selectedRatings().has(rating.id)" [class.flagged]="rating.score <= 2">
+                <div class="col-check">
+                  <input 
+                    type="checkbox" 
+                    [checked]="selectedRatings().has(rating.id)"
+                    (change)="toggleRatingSelection(rating.id)"
+                  />
+                </div>
+                <div class="col-event">
+                  <span class="event-title-sm">{{ rating.eventTitle }}</span>
+                </div>
+                <div class="col-user-sm">
+                  <span class="user-id-badge">{{ rating.user_id.substring(0, 12) }}...</span>
+                </div>
+                <div class="col-score">
+                  <span class="rating-badge large" [class]="getScoreClass(rating.score)">
+                    {{ rating.score }}★
+                  </span>
+                </div>
+                <div class="col-review">
+                  <span class="review-text">{{ rating.review || 'No review' }}</span>
+                </div>
+                <div class="col-presence">
+                  @if (rating.was_present) {
+                    <span class="presence-badge yes">Yes</span>
+                  } @else {
+                    <span class="presence-badge no">No</span>
+                  }
+                </div>
+                <div class="col-date">{{ formatDate(rating.created_at) }}</div>
+                <div class="col-actions">
+                  <button class="btn-icon delete" title="Delete Rating" (click)="toggleRatingSelection(rating.id); confirmDeleteRatings()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+            @if (filteredRatings().length === 0) {
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <p>No ratings found</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- User Detail Modal -->
+  @if (showUserModal() && selectedUser()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>User Details</h2>
+          <button class="modal-close" (click)="closeModals()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="user-detail-header">
+            <div class="user-avatar large">{{ getUserInitials(selectedUser()!.name) }}</div>
+            <div class="user-detail-info">
+              <h3>{{ selectedUser()!.name || 'Unknown User' }}</h3>
+              <p class="user-id-full">{{ selectedUser()!.id }}</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Email</span>
+              <span class="detail-value">{{ selectedUser()!.email || 'Not provided' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">City</span>
+              <span class="detail-value">{{ selectedUser()!.city || 'Not set' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Ratings Given</span>
+              <span class="detail-value">{{ selectedUser()!.ratingCount }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Average Rating</span>
+              <span class="detail-value">{{ selectedUser()!.avgRating }}★</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Last Activity</span>
+              <span class="detail-value">{{ formatDateTime(selectedUser()!.lastActivity) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModals()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Event Detail Modal -->
+  @if (showEventModal() && selectedEvent()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Event Details</h2>
+          <button class="modal-close" (click)="closeModals()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="event-detail-header" [style.border-left-color]="selectedEvent()!.color">
+            <h3>{{ selectedEvent()!.title }}</h3>
+            <p>{{ selectedEvent()!.subtitle }}</p>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Category</span>
+              <span class="detail-value category-tag" [style.background]="selectedEvent()!.category?.color">
+                {{ selectedEvent()!.category?.name }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">City</span>
+              <span class="detail-value">{{ selectedEvent()!.city?.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Neighborhood</span>
+              <span class="detail-value">{{ selectedEvent()!.neighborhood || 'Not set' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date</span>
+              <span class="detail-value">{{ formatDate(selectedEvent()!.event_date) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Time</span>
+              <span class="detail-value">{{ selectedEvent()!.event_time }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Average Rating</span>
+              <span class="detail-value">{{ (selectedEvent()!.avg_rating || 0).toFixed(1) }}★</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Reviews</span>
+              <span class="detail-value">{{ selectedEvent()!.review_count || 0 }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Visitors</span>
+              <span class="detail-value">{{ selectedEvent()!.visitor_count || 0 }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Views</span>
+              <span class="detail-value">{{ selectedEvent()!.view_count || 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModals()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Confirm Modal -->
+  @if (showConfirmModal() && confirmAction()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="modal-content confirm" (click)="$event.stopPropagation()">
+        <div class="modal-header danger">
+          <h2>Confirm Action</h2>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+          </div>
+          <p class="confirm-message">{{ confirmAction()!.message }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModals()" [disabled]="actionLoading()">Cancel</button>
+          <button class="btn-danger" (click)="executeConfirmAction()" [disabled]="actionLoading()">
+            @if (actionLoading()) {
+              Processing...
+            } @else {
+              Confirm
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

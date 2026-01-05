@@ -266,6 +266,34 @@ export class SupabaseService {
     };
   }
 
+  async deleteEvent(eventId: string): Promise<void> {
+    // First delete related ratings
+    await this.supabase
+      .from('ratings')
+      .delete()
+      .eq('event_id', eventId);
+
+    // Delete related visits
+    await this.supabase
+      .from('visits')
+      .delete()
+      .eq('event_id', eventId);
+
+    // Delete related views
+    await this.supabase
+      .from('event_views')
+      .delete()
+      .eq('event_id', eventId);
+
+    // Finally delete the event
+    const { error } = await this.supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+
+    if (error) throw error;
+  }
+
   async getEventAvgRating(eventId: string): Promise<number> {
     const { data, error } = await this.supabase
       .rpc('get_event_avg_rating', { event_uuid: eventId });
@@ -441,6 +469,23 @@ export class SupabaseService {
         )
       `)
       .eq('event_id', eventId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getAllRatings(): Promise<Rating[]> {
+    const { data, error } = await this.supabase
+      .from('ratings')
+      .select(`
+        *,
+        event:events(
+          *,
+          category:categories(*),
+          city:cities(*)
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

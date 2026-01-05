@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SupabaseService, Category } from '../../services/supabase.service';
 import { UserTrackingService } from '../../services/user-tracking.service';
 
@@ -32,7 +32,7 @@ interface FavoriteCategory {
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
