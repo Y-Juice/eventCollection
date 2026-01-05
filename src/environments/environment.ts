@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  // API URL (not used when useLocalApi is false)
+  apiUrl: '',
   // Using Supabase (PostgreSQL) as persistent database
   useLocalApi: false,
   supabaseUrl: 'https://yvswrfkogqpvkhohouvp.supabase.co',
