@@ -185,7 +185,7 @@
   } @else {
     <div class="events-grid">
       @for (event of filteredEvents(); track event.id) {
-        <article class="event-card" [style.--card-color]="event.color" appTrackInteraction (click)="trackEventClick(event)">
+        <article class="event-card" [style.--card-color]="event.color" appTrackInteraction (click)="openEvent(event)">
           <div class="event-card-header">
             <span class="event-category-badge" [ngSwitch]="getCategoryName(event)">
               <svg *ngSwitchCase="'music'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

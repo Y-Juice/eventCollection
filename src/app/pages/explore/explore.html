@@ -151,7 +151,7 @@
     } @else {
       <div class="events-list">
         @for (event of filteredEvents(); track event.id) {
-          <article class="event-item">
+          <article class="event-item" (click)="openEvent(event)">
             <div class="event-color-bar" [style.background]="event.color"></div>
             <div class="event-main">
               <div class="event-header">

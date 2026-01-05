@@ -1,5 +1,6 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { SupabaseService, EventWithRelations, City, Category } from '../../services/supabase.service';
 import { UserTrackingService } from '../../services/user-tracking.service';
 
@@ -12,6 +13,7 @@ import { UserTrackingService } from '../../services/user-tracking.service';
 export class Home implements OnInit {
   private supabase = inject(SupabaseService);
   private trackingService = inject(UserTrackingService);
+  private router = inject(Router);
   protected readonly cities = signal<City[]>([]);
   protected readonly selectedCity = signal<string>('Brussels');
   protected readonly categories = signal<Category[]>([]);
@@ -100,7 +102,8 @@ export class Home implements OnInit {
     await this.loadEvents();
   }
 
-  async trackEventClick(event: EventWithRelations): Promise<void> {
+  async openEvent(event: EventWithRelations): Promise<void> {
+    // Track the click
     await this.trackingService.trackEvent({
       event_type: 'event_click',
       event_category: 'content',
@@ -114,6 +117,9 @@ export class Home implements OnInit {
         event_date: event.event_date
       }
     });
+
+    // Navigate to event detail
+    this.router.navigate(['/event', event.id]);
   }
 
   // Helper methods to get category/city names for template compatibility

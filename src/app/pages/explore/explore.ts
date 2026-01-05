@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SupabaseService, EventWithRelations, City, Category } from '../../services/supabase.service';
 
 @Component({
@@ -11,6 +12,7 @@ import { SupabaseService, EventWithRelations, City, Category } from '../../servi
 })
 export class Explore implements OnInit {
   private supabase = inject(SupabaseService);
+  private router = inject(Router);
   protected readonly searchQuery = signal<string>('');
   protected readonly selectedCity = signal<string>('all');
   protected readonly selectedCategory = signal<string>('all');
@@ -174,5 +176,9 @@ export class Explore implements OnInit {
 
   formatTime(timeStr: string): string {
     return timeStr;
+  }
+
+  openEvent(event: EventWithRelations): void {
+    this.router.navigate(['/event', event.id]);
   }
 }
